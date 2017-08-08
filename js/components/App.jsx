@@ -57,6 +57,9 @@ class App extends Component {
               <HomeButton>
                 <Link to='/'>Home</Link>
               </HomeButton>
+              <HomeButton>
+                <Link to='/edit'>Edit</Link>
+              </HomeButton>
             </TopBar>
             {this.props.children}
           </div>
