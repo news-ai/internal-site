@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import dummydata from './data';
+import {fromJS, is, List, Map} from 'immutable';
 
 // FETCH endpoint
 // PATCH endpoint
@@ -9,42 +10,37 @@ import dummydata from './data';
 // array: ADD, DELETE, EDIT
 // object: EDIT, DELETE,
 
-const Node = ({data}) => {
+const Node = ({data, keyPath, onChange}) => {
   let renderNodes = [];
   let nodes = [];
 
-  if (Array.isArray(data)) {
-    console.log('arr');
+  if (List.isList(data)) {
     nodes = data.map((child, i) => (
       <div style={{display: 'block'}} >
-      {i}: <Node data={data[i]} />
+      {i}: <Node keyPath={[...keyPath, i]} data={child} onChange={onChange} />
       </div>
       ));
     renderNodes = [
-      <div style={{display: 'block'}}>[</div>,
+      <div>[</div>,
       ...nodes,
-      <div style={{display: 'block'}}>]</div>
+      <div>]</div>
     ];
-  } else if (typeof data === 'object') {
+  } else if (Map.isMap(data)) {
+    nodes = data.entrySeq().map(([key, val]) => (
+      <div style={{display: 'block'}} >
+      {key}: <Node keyPath={[...keyPath, key]} data={val} onChange={onChange} />
+      </div>
+      ));
+    renderNodes = [
+      <div>{'{'}</div>,
+      ...nodes,
+      <div>{'}'}</div>
+    ];
+  } else {
     if (data === null) {
       return <span>null</span>;
-    } else {
-      console.log('obj');
-      nodes = Object.keys(data)
-      .map((key, i) => (
-        <div style={{display: 'block'}} >
-        {key}: <Node data={data[key]} />
-        </div>
-        ));
-      renderNodes = [
-        <div style={{display: 'block'}}>{'{'}</div>,
-        ...nodes,
-        <div style={{display: 'block'}}>{'}'}</div>
-      ];
     }
-  } else {
-    console.log('str');
-    return <span>{data}</span>;
+    return <input type='text' value={data} onChange={e => onChange(keyPath, e.target.value)} />;
   }
   return (
     <div style={{display: 'block', margin: 30}}>
@@ -56,14 +52,29 @@ const Node = ({data}) => {
 class ObjectEditor extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      data: fromJS(dummydata),
+      immudata: fromJS(dummydata)
+    };
+    this.onChange = this.onChange.bind(this);
   }
+
+  onChange(keyPath, newValue) {
+    console.log(keyPath);
+    console.log(newValue);
+    const data = this.state.data.setIn(keyPath, newValue);
+    console.log(data.toJS());
+    this.setState({data});
+  }
+
   render() {
-    const {data} = dummydata;
-    console.log(data);
+    const {data, immudata} = this.state;
     return (
       <div>
         EDITOR
-        <Node data={data} />
+      {!is(data, immudata) &&
+        <span style={{color: 'red'}} >CHANGED</span>}
+        <Node data={data} keyPath={[]} onChange={this.onChange} />
       </div>
     );
   }
