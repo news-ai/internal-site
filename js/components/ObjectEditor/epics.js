@@ -11,7 +11,7 @@ export const fetchContactSchema = (action$) =>
       Observable.fromPromise(api.get(`/database-schemas/_mappings`))
       .map(response => {
         const dbKey = Object.keys(response.data)[0];
-        const mapping = response.data[dbKey].mappings;
+        const mapping = response.data[dbKey].mappings.contacts.properties;
         return ({type: schemaConstant.RECEIVE, mapping, schemaType: 'contacts'});
       })
       .catch(err => Observable.of({type: schemaConstant.REQUEST_FAIL, message: err}))
