@@ -5,6 +5,8 @@ import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import {grey300} from 'material-ui/styles/colors';
+import cn from 'classnames';
+import styled from 'styled-components';
 
 // FETCH endpoint
 // PATCH endpoint
@@ -14,46 +16,68 @@ import {grey300} from 'material-ui/styles/colors';
 // array: ADD, DELETE, EDIT
 // object: EDIT, DELETE,
 
-const Node = ({data, keyPath, onChange}) => {
-  let renderNodes = [];
-  let nodes = [];
+const ObjectBlock = styled.div`
+  display: ${props => props.inline ? 'flex' : 'block'};
+  height: ${props => props.inline && '40px'};
+  align-items: center;
+  margin-left: 10px;
+  white-space: nowrap;
+`;
 
-  if (List.isList(data)) {
-    nodes = data.map((child, i) => (
-      <div style={{display: 'block'}} >
-        <span style={{color: 'green'}} >{i}: </span>
-        <Node keyPath={[...keyPath, i]} data={child} onChange={onChange} />
-      </div>
-      ));
-    renderNodes = [
-      <div>[</div>,
-      ...nodes,
-      <div>]</div>
-    ];
-  } else if (Map.isMap(data)) {
-    nodes = data.entrySeq().map(([key, val]) => (
-      <div style={{display: 'block'}} >
-        <span style={{color: 'blue'}} >{key}: </span>
-        <Node keyPath={[...keyPath, key]} data={val} onChange={onChange} />
-      </div>
-      ));
-    renderNodes = [
-      <div>{'{'}</div>,
-      ...nodes,
-      <div>{'}'}</div>
-    ];
-  } else {
-    if (data === null) {
-      return <span>null</span>;
-    }
-    return <input type='text' value={data} onChange={e => onChange(keyPath, e.target.value)} />;
+class Node extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {open: true};
   }
-  return (
-    <div style={{display: 'block', margin: 30}}>
-    {renderNodes}
-    </div>
-    );
-};
+
+  render() {
+    const {data, keyPath, onChange} = this.props;
+    const {open} = this.state;
+    let renderNodes = [];
+    let nodes = [];
+
+    if (List.isList(data)) {
+      nodes = data.map((child, i) => {
+        return (
+          <div style={{display: 'block', marginLeft: 10}} >
+            <label style={{color: 'green'}} >{i}: </label>
+            <Node keyPath={[...keyPath, i]} data={child} onChange={onChange} />
+          </div>
+          );
+      });
+      renderNodes = open ? [
+        <div className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: false})} >[ </div>,
+        ...nodes,
+        <div className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: false})} > ]</div>,
+      ] : <span className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: true})} >[ ... ]</span>;
+    } else if (Map.isMap(data)) {
+      nodes = data.entrySeq().map(([key, val]) => {
+        const isProperty = !Map.isMap(val) && !List.isList(val);
+        return (
+        <ObjectBlock inline={isProperty} >
+          <span style={{color: 'blue'}} >{key}: </span>
+          <Node keyPath={[...keyPath, key]} data={val} onChange={onChange} />
+        </ObjectBlock>
+        );
+      });
+      renderNodes = [
+        <div>{'{'}</div>,
+        ...nodes,
+        <div>{'}'}</div>
+      ];
+    } else {
+      if (data === null) {
+        return <span style={{marginLeft: 10}} >null</span>;
+      }
+      return <TextField style={{marginLeft: 10}} value={data} onChange={e => onChange(keyPath, e.target.value)} />;
+    }
+    return (
+      <div style={{display: 'block', marginLeft: 30}}>
+      {renderNodes}
+      </div>
+      );
+  }
+}
 
 class ObjectEditor extends Component {
   constructor(props) {
@@ -80,8 +104,8 @@ class ObjectEditor extends Component {
         EDITOR
       {!is(data, immudata) &&
         <div>
-          <RaisedButton label='Save' primary />
           <RaisedButton label='Revert' secondary onClick={_ => this.setState({data: immudata})} />
+          <RaisedButton label='Save' primary />
         </div>
       }
         <Node data={data} keyPath={[]} onChange={this.onChange} />
