@@ -60,11 +60,11 @@ class Node extends Component {
         </ObjectBlock>
         );
       });
-      renderNodes = [
-        <div>{'{'}</div>,
+      renderNodes = open ? [
+        <div className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: false})} >{'{ '}</div>,
         ...nodes,
-        <div>{'}'}</div>
-      ];
+        <div className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: false})} > {' }'}</div>,
+      ] : <span className='pointer' style={{color: 'green'}} onClick={_ => this.setState({open: true})} >{'{'} ... {'}'}</span>;
     } else {
       if (data === null) {
         return <span style={{marginLeft: 10}} >null</span>;
