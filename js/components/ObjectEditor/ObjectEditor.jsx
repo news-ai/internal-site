@@ -108,8 +108,8 @@ class Node extends Component {
       });
       renderNodes = open ? [
         <GreenDiv>
-          <FontIcon onClick={_ => handleAddClick(keyPath, keyType)} color={grey300} hoverColor={grey500} className='fa fa-plus' style={{fontSize: '0.9em', marginRight: 5}} />
           <span onClick={this.onClose}>[ </span>
+          <FontIcon onClick={_ => handleAddClick(keyPath, keyType)} color={grey300} hoverColor={grey500} className='fa fa-plus' style={{fontSize: '0.9em', marginLeft: 5}} />
         </GreenDiv>,
         ...nodes,
         <GreenDiv onClick={this.onClose} > ]</GreenDiv>,
@@ -119,14 +119,14 @@ class Node extends Component {
         const isProperty = !Map.isMap(val) && !List.isList(val);
         return (
         <ObjectBlock inline={isProperty} >
+          <span style={{color: 'blue'}} >{key}: </span>
           <FontIcon
           onClick={_ => handleRemoveClick([...keyPath, key])}
           color={grey300}
           hoverColor={grey500}
           className='fa fa-times pointer'
-          style={{fontSize: '0.9em', marginRight: 5}}
+          style={{fontSize: '0.9em', marginLeft: 5}}
           />
-          <span style={{color: 'blue'}} >{key}: </span>
           <Node
           schema={schema}
           keyPath={[...keyPath, key]}
@@ -183,7 +183,7 @@ const KeyTypeObject = ({originalKeyPath, keyType, parentName, keyPath, onChange,
         <span>{parentName}: </span>
         <TextField
         id={parentName}
-        disabled={data.getIn(originalKeyPath).has(parentName)}
+        disabled={data.hasIn([...originalKeyPath, parentName])}
         placeholder={keyType.type}
         type='text'
         onChange={e => onChange(keyPath, e.target.value)}
@@ -255,6 +255,9 @@ class ObjectEditor extends Component {
   }
 
   onTempMapChange(keyPath, newValue) {
+    console.log(keyPath);
+    console.log(this.state.keyPath);
+    console.log(this.state.data.toJS());
     const tempMap = this.state.tempMap.setIn(keyPath, newValue);
     this.setState({tempMap});
   }
@@ -291,6 +294,7 @@ class ObjectEditor extends Component {
                 <PlainSelect innerRef={ref => this.whichObject = ref} defaultValue='object'>
                   <option value='object'>Object</option>
                   <option value='array'>Array</option>
+                  <option value='string'>String</option>
                 </PlainSelect>
               </div>
             </div>
