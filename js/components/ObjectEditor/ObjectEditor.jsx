@@ -263,17 +263,13 @@ class ObjectEditor extends Component {
   }
 
   onTempMapChange(keyPath, newValue) {
-    console.log(keyPath);
-    console.log(this.state.keyPath);
-    console.log(this.state.data.toJS());
-    const tempMap = this.state.tempMap.setIn(keyPath, newValue);
+    const tempMap = typeof this.state.keyType.type === 'string' ? newValue : this.state.tempMap.setIn(keyPath, newValue);
     this.setState({tempMap});
   }
 
   handleAddClick(keyPath, keyType) {
-    console.log(keyPath);
-    console.log(keyType);
-    this.setState({keyPath, keyType, tempMap: Map({})}, _ => this.setState({open: true}));
+    const tempMap = typeof keyType.type === 'string' ? '' : Map({});
+    this.setState({keyPath, keyType, tempMap}, _ => this.setState({open: true}));
   }
 
   handleRemoveClick(keyPath) {
@@ -299,7 +295,7 @@ class ObjectEditor extends Component {
               PATH: {keyPath.join(' --> ')}
               </span>
               <div style={{display: 'inline-block', float: 'right'}} >
-                <PlainSelect innerRef={ref => this.whichObject = ref} defaultValue='object'>
+                <PlainSelect disabled={!!data.getIn(keyPath)} innerRef={ref => this.whichObject = ref} defaultValue='object'>
                   <option value='object'>Object</option>
                   <option value='array'>Array</option>
                   <option value='string'>String</option>
