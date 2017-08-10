@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import dummydata from './data';
-import {fromJS, is, List, Map} from 'immutable';
+import {fromJS, is, isImmutable, List, Map} from 'immutable';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
 import IconButton from 'material-ui/IconButton';
@@ -70,10 +70,16 @@ class Node extends Component {
   }
 
   render() {
-    const {data, keyPath, onChange, handleAddClick, handleRemoveClick, schema} = this.props;
+    const {data, immudata, keyPath, onChange, handleAddClick, handleRemoveClick, schema} = this.props;
     const {open} = this.state;
     let renderNodes = [];
     let nodes = [];
+    let dataChanged = false;
+    if (Map.isMap(data) || List.isList(data)) {
+      dataChanged = !is(data, immudata);
+    } else {
+      dataChanged = data !== immudata;
+    }
 
     // console.log(keyPath);
     // console.log(schema);
@@ -99,6 +105,7 @@ class Node extends Component {
             schema={schema}
             keyPath={[...keyPath, i]}
             data={child}
+            immudata={immudata && immudata.get(i)}
             onChange={onChange}
             handleAddClick={handleAddClick}
             handleRemoveClick={handleRemoveClick}
@@ -119,18 +126,19 @@ class Node extends Component {
         const isProperty = !Map.isMap(val) && !List.isList(val);
         return (
         <ObjectBlock inline={isProperty} >
-          <span style={{color: 'blue'}} >{key}: </span>
           <FontIcon
           onClick={_ => handleRemoveClick([...keyPath, key])}
           color={grey300}
           hoverColor={grey500}
           className='fa fa-times pointer'
-          style={{fontSize: '0.9em', marginLeft: 5}}
+          style={{fontSize: '0.9em', marginRight: 5}}
           />
+          <span style={{color: 'blue'}} >{key}: </span>
           <Node
           schema={schema}
           keyPath={[...keyPath, key]}
           data={val}
+          immudata={immudata && immudata.get(key)}
           onChange={onChange}
           handleAddClick={handleAddClick}
           handleRemoveClick={handleRemoveClick}
@@ -140,7 +148,7 @@ class Node extends Component {
       });
       const numKeyUnfilled = Object.keys(keyType).length - data.keySeq().filter(key => keyType[key]).count();
       renderNodes = open ? [
-        <BlueDiv >
+        <BlueDiv>
           <span onClick={this.onClose}>{'{ '}</span>
         {numKeyUnfilled > 0 &&
           <FontIcon
@@ -162,7 +170,7 @@ class Node extends Component {
         <TextField
         placeholder={keyType.type}
         id={keyPath.join('-')}
-        style={{marginLeft: 10}}
+        style={{marginLeft: 10, backgroundColor: dataChanged ? 'yellow' : '#ffffff'}}
         value={data}
         onChange={e => onChange(keyPath, e.target.value)}
         />
@@ -316,6 +324,7 @@ class ObjectEditor extends Component {
         <Node
         schema={mapping}
         data={data}
+        immudata={immudata}
         keyPath={[]}
         onChange={this.onChange}
         handleAddClick={this.handleAddClick}
