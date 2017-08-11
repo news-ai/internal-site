@@ -51,3 +51,16 @@ export const fetchContact = (action$, {getState}) =>
       )
     )
   .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));
+
+export const patchContact = (action$, {getState}) =>
+  action$.ofType('PATCH_CONTACT')
+  .filter(() => !getState().contactReducer.isReceiving)
+  .switchMap(({email, data}) =>
+    Observable.merge(
+      Observable.of({type: contactConstant.PATCH, email, data}),
+      Observable.fromPromise(api.patch(`/database-contacts/${email}`, data))
+      .map(response => ({type: contactConstant.RECEIVE, email, contact: response.data}))
+      .catch(err => Observable.of({type: contactConstant.REQUEST_FAIL, message: err, email}))
+      )
+    )
+  .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));

@@ -29,6 +29,16 @@ export function post(endpoint, body) {
   .then(response => response.status === 200 ? Promise.resolve(response.data) : Promise.reject(response));
 }
 
+export function patch(endpoint, body) {
+  return axios({
+    method: 'patch',
+    url: `${window.TABULAE_API_BASE}${endpoint}`,
+    withCredentials: true,
+    data: JSON.stringify(body)
+  })
+  .then(response => response.status === 200 ? Promise.resolve(response.data) : Promise.reject(response));
+}
+
 // export function post(endpoint, body) {
 //   return fetch(`${window.TABULAE_API_BASE}${endpoint}`, {
 //     method: 'POST',
@@ -49,18 +59,18 @@ export function postFile(endpoint, file) {
     .then(text => JSON.parse(text));
 }
 
-export function patch(endpoint, body) {
-  return fetch(`${window.TABULAE_API_BASE}${endpoint}`, {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    mode: 'cors',
-    method: 'PATCH',
-    credentials: 'include',
-    body: JSON.stringify(body)
-  })
-    .then(response => response.status === 200 ? response.text() : Promise.reject(response))
-    .then(text => JSON.parse(text));
-}
+// export function patch(endpoint, body) {
+//   return fetch(`${window.TABULAE_API_BASE}${endpoint}`, {
+//     headers: {
+//       'Accept': 'application/json',
+//       'Content-Type': 'application/json'
+//     },
+//     mode: 'cors',
+//     method: 'PATCH',
+//     credentials: 'include',
+//     body: JSON.stringify(body)
+//   })
+//     .then(response => response.status === 200 ? response.text() : Promise.reject(response))
+//     .then(text => JSON.parse(text));
+// }
 

@@ -35,7 +35,8 @@ class ObjectEditor extends Component {
       immudata: fromJS(this.props.rawData),
       open: false,
       keyPath: null,
-      keyType: null
+      keyType: null,
+      previousEdits: [],
     };
     this.onChange = this.onChange.bind(this);
     this.onAddSubmit = this.onAddSubmit.bind(this);
@@ -46,12 +47,18 @@ class ObjectEditor extends Component {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
-  componentWillMount() {
-    if (!this.props.schema) this.props.fetchSchema();
+  componentWillReceiveProps(nextProps) {
+    const data = fromJS(nextProps.rawData);
+    console.log('get new');
+    if (!is(data, this.state.immudata)) {
+      // reset data when receive new ones
+      this.setState({data, immudata: data});
+    }
   }
 
   onSubmit() {
-
+    // console.log(this.state.data.toJS());
+    this.props.updateData(this.state.data, this.state.immudata);
   }
 
   onChange(keyPath, newValue) {
@@ -63,23 +70,24 @@ class ObjectEditor extends Component {
   }
 
   onAddSubmit() {
-    const existingData = this.state.data.getIn(this.state.keyPath);
-    let data;
+    const {data, keyPath, tempMap} = this.state;
+    const existingData = data.getIn(this.state.keyPath);
+    let newData;
     if (existingData === null) {
       // add complete new data to previously null field
       const mergeObj = this.whichObject.value === 'array' ? List([this.state.tempMap]) : this.state.tempMap;
-      data = this.state.data.setIn(this.state.keyPath, mergeObj);
+      newData = data.setIn(keyPath, mergeObj);
     } else if (List.isList(existingData)) {
       // append existing List with new data
-      const newList = existingData.push(this.state.tempMap);
-      data = this.state.data.setIn(this.state.keyPath, newList);
+      const newList = existingData.push(tempMap);
+      newData = data.setIn(keyPath, newList);
     } else if (Map.isMap(existingData)) {
-      data = this.state.data.setIn(this.state.keyPath, existingData.merge(this.state.tempMap));
+      newData = data.setIn(keyPath, existingData.merge(tempMap));
     }
-    this.setState({data}, this.onCloseAddPanel);
+    this.setState({data: newData}, this.onCloseAddPanel);
   }
 
-  onTempMapChange(keyPath, newValue, isArray, keyType) {
+  onTempMapChange(keyPath, newValue) {
     const tempMap = typeof this.state.keyType.type === 'string' ? newValue : this.state.tempMap.setIn(keyPath, newValue);
     this.setState({tempMap});
   }
@@ -96,10 +104,10 @@ class ObjectEditor extends Component {
 
   render() {
     const {data, immudata, open, keyPath, keyType} = this.state;
-    const {schema, rawData} = this.props;
+    const {schema} = this.props;
     // const schema = mapping;
 
-    return data && schema ? (
+    return (
       <div>
       {!is(data, immudata) &&
         <div>
@@ -144,7 +152,53 @@ class ObjectEditor extends Component {
         handleRemoveClick={this.handleRemoveClick}
         />
       </div>
-    ) : <div>LOADING...</div>;
+    );
+  }
+}
+
+// THIS IS FETCHING LAYER
+class ObjectEditorContainer extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      previousEdits: []
+    };
+    this.updateData = this.updateData.bind(this);
+    this.revertChange = this.revertChange.bind(this);
+  }
+
+  componentWillMount() {
+    if (!this.props.schema) this.props.fetchSchema();
+    if (!this.props.rawData) this.props.fetchObject();
+  }
+
+  updateData(data, prevData) {
+    this.props.patchObject(data.toJS());
+    this.setState({
+      previousEdits: [...this.state.previousEdits, prevData]
+    });
+  }
+
+  revertChange() {
+    const {previousEdits} = this.state;
+    const data = previousEdits[previousEdits.length - 1];
+    // console.log(data.toJS());
+    this.props.patchObject(data.toJS());
+    this.setState({
+      previousEdits: previousEdits.slice(0, -1)
+    });
+  }
+
+  render() {
+    const {schema, rawData} = this.props;
+    const {previousEdits} = this.state;
+
+    return schema && rawData ?
+    <div>
+    {previousEdits.length > 0 &&
+      <RaisedButton label='Revert Submitted' secondary onClick={this.revertChange} />}
+      <ObjectEditor updateData={this.updateData} {...this.props} />
+    </div> : <div>LOADING</div>;
   }
 }
 
@@ -164,7 +218,23 @@ export default connect(
   (dispatch, {router}) => {
     const {schemaType, id} = router.location.query;
     return {
-      fetchSchema: _ => dispatch({type: 'FETCH_SCHEMA', schemaType})
+      fetchSchema: _ => dispatch({type: 'FETCH_SCHEMA', schemaType}),
+      fetchObject: _ => {
+        switch (schemaType) {
+          case 'contacts':
+            return dispatch({type: 'FETCH_CONTACT', email: id, useCache: false});
+          default:
+            return undefined;
+        }
+      },
+      patchObject: data => {
+        switch (schemaType) {
+          case 'contacts':
+            return dispatch({type: 'PATCH_CONTACT', email: id, data});
+          default:
+            return undefined;
+        }
+      }
     };
   }
-  )(withRouter(ObjectEditor));
+  )(withRouter(ObjectEditorContainer));
