@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import dummydata from './data';
-import {fromJS, is, isImmutable, List, Map} from 'immutable';
+import {fromJS, is, List, Map} from 'immutable';
 import TextField from 'material-ui/TextField';
 import withRouter from 'react-router/lib/withRouter';
 import Dialog from 'material-ui/Dialog';
