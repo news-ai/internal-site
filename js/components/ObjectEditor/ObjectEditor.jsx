@@ -1,19 +1,14 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import dummydata from './data';
 import {fromJS, is, List, Map} from 'immutable';
-import TextField from 'material-ui/TextField';
 import withRouter from 'react-router/lib/withRouter';
 import Dialog from 'material-ui/Dialog';
-import IconButton from 'material-ui/IconButton';
 import RaisedButton from 'material-ui/RaisedButton';
-import FontIcon from 'material-ui/FontIcon';
-import Checkbox from 'material-ui/Checkbox';
 import {grey300, grey500} from 'material-ui/styles/colors';
-import cn from 'classnames';
 import styled from 'styled-components';
-import map from './schema';
-import get from 'lodash/get';
+
+import Node from './Node';
+import KeyTypeObject from './KeyTypeObject';
 
 // FETCH endpoint
 // PATCH endpoint
@@ -23,38 +18,6 @@ import get from 'lodash/get';
 // array: ADD, DELETE, EDIT
 // object: EDIT, DELETE,
 
-// const convert = mapping => Object
-// .entries(mapping)
-// .reduce((newMap, [key, val]) => {
-//   newMap[key] = val.properties ? convert(val.properties) : val;
-//   return newMap;
-// }, {});
-
-// const mapping = convert(map.data.md1.mappings.contacts.properties.data.properties);
-
-const ObjectBlock = styled.div`
-  display: ${props => props.inline ? 'flex' : 'block'};
-  height: ${props => props.inline && '40px'};
-  align-items: center;
-  margin-left: 10px;
-  white-space: nowrap;
-`;
-
-const GreenDiv = styled.div`
-  cursor: pointer;
-  color: green;
-`;
-
-const BlueDiv = styled.div`
-  cursor: pointer;
-  color: blue;
-`;
-
-const NodeContainer = styled.div`
-  display: block;
-  margin-left: 30px;
-`;
-
 const PlainSelect = styled.select`
   height: auto;
   width: auto;
@@ -63,166 +26,6 @@ const PlainSelect = styled.select`
   MozAppearance: menulist;
   WebkitAppearance: menulist;
 `;
-
-class Node extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {open: true};
-    this.onOpen = _ => this.setState({open: true});
-    this.onClose = _ => this.setState({open: false});
-  }
-
-  render() {
-    const {data, immudata, keyPath, onChange, handleAddClick, handleRemoveClick, schema} = this.props;
-    const {open} = this.state;
-    let renderNodes = [];
-    let nodes = [];
-    let dataChanged = false;
-    if (Map.isMap(data) || List.isList(data)) {
-      dataChanged = !is(data, immudata);
-    } else {
-      dataChanged = data !== immudata;
-    }
-
-    // console.log(keyPath);
-    // console.log(schema);
-    const keyType = keyPath
-    .filter(path => typeof path === 'string')
-    .reduce((acc, path, i) => acc[path], schema);
-    // console.log(keyType);
-    // console.log(keyPath);
-
-    if (List.isList(data)) {
-      nodes = data.map((child, i) => {
-        return (
-          <div style={{display: 'block', marginLeft: 10}} >
-            <FontIcon
-            onClick={_ => handleRemoveClick([...keyPath, i])}
-            color={grey300}
-            hoverColor={grey500}
-            className='fa fa-times'
-            style={{fontSize: '0.9em', marginRight: 5}}
-            />
-            <span className='text' style={{color: 'green'}} >{i}: </span>
-            <Node
-            schema={schema}
-            keyPath={[...keyPath, i]}
-            data={child}
-            immudata={immudata && immudata.get(i)}
-            onChange={onChange}
-            handleAddClick={handleAddClick}
-            handleRemoveClick={handleRemoveClick}
-            />
-          </div>
-          );
-      });
-      renderNodes = open ? [
-        <GreenDiv>
-          <span onClick={this.onClose}>[ </span>
-          <FontIcon onClick={_ => handleAddClick(keyPath, keyType)} color={grey300} hoverColor={grey500} className='fa fa-plus' style={{fontSize: '0.9em', marginLeft: 5}} />
-        </GreenDiv>,
-        ...nodes,
-        <GreenDiv onClick={this.onClose} > ]</GreenDiv>,
-      ] : <GreenDiv onClick={this.onOpen} >[ ... ]</GreenDiv>;
-    } else if (Map.isMap(data)) {
-      nodes = data.entrySeq().map(([key, val]) => {
-        const isProperty = !Map.isMap(val) && !List.isList(val);
-        return (
-        <ObjectBlock inline={isProperty} >
-          <FontIcon
-          onClick={_ => handleRemoveClick([...keyPath, key])}
-          color={grey300}
-          hoverColor={grey500}
-          className='fa fa-times pointer'
-          style={{fontSize: '0.9em', marginRight: 5}}
-          />
-          <span style={{color: 'blue'}} >{key}: </span>
-          <Node
-          schema={schema}
-          keyPath={[...keyPath, key]}
-          data={val}
-          immudata={immudata && immudata.get(key)}
-          onChange={onChange}
-          handleAddClick={handleAddClick}
-          handleRemoveClick={handleRemoveClick}
-          />
-        </ObjectBlock>
-        );
-      });
-      const numKeyUnfilled = Object.keys(keyType).length - data.keySeq().filter(key => keyType[key]).count();
-      renderNodes = open ? [
-        <BlueDiv>
-          <span onClick={this.onClose}>{'{ '}</span>
-        {numKeyUnfilled > 0 &&
-          <FontIcon
-          onClick={_ => handleAddClick(keyPath, keyType)}
-          color={grey300}
-          hoverColor={grey500}
-          className='fa fa-plus'
-          style={{fontSize: '0.9em', marginLeft: 5}}
-          />}
-        </BlueDiv>,
-        ...nodes,
-        <BlueDiv onClick={this.onClose} > {' }'}</BlueDiv>,
-      ] : <BlueDiv onClick={this.onOpen} >{'{ ... }'}</BlueDiv>;
-    } else {
-      if (data === null) {
-        return <div className='pointer' style={{marginLeft: 10}} onClick={_ => handleAddClick(keyPath, keyType)} >null</div>;
-      }
-      return (
-        <TextField
-        placeholder={keyType.type}
-        id={keyPath.join('-')}
-        style={{marginLeft: 10, backgroundColor: dataChanged ? 'yellow' : '#ffffff'}}
-        value={data}
-        onChange={e => onChange(keyPath, e.target.value)}
-        />
-        );
-    }
-    return (
-      <NodeContainer>
-      {renderNodes}
-      </NodeContainer>
-      );
-  }
-}
-
-class KeyTypeObject extends Component {
-  render() {
-    const {originalKeyPath, keyType, parentName, keyPath, onChange, data} = this.props;
-    if (typeof keyType.type === 'string') {
-      return (
-        <div className='vertical-center'>
-          <span className='text' style={{marginRight: 15}} >{parentName}</span>
-          <TextField
-          id={parentName}
-          disabled={data.hasIn([...originalKeyPath, parentName])}
-          placeholder={keyType.type}
-          type='text'
-          onChange={e => onChange(keyPath, e.target.value)}
-          />
-        </div>
-        );
-    }
-    const renderNodes = Object
-    .keys(keyType)
-    .map(typeName =>
-      <KeyTypeObject
-      keyPath={[...keyPath, typeName]}
-      parentName={typeName}
-      keyType={keyType[typeName]}
-      onChange={onChange}
-      data={data}
-      originalKeyPath={originalKeyPath}
-      />);
-
-    return (
-      <div>
-      {renderNodes}
-      </div>
-      );
-  }
-}
 
 class ObjectEditor extends Component {
   constructor(props) {
@@ -240,10 +43,15 @@ class ObjectEditor extends Component {
     this.onTempMapChange = this.onTempMapChange.bind(this);
     this.onCloseAddPanel = _ => this.setState({open: false, keyPath: null, keyType: null});
     this.handleRemoveClick = this.handleRemoveClick.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   componentWillMount() {
     if (!this.props.schema) this.props.fetchSchema();
+  }
+
+  onSubmit() {
+
   }
 
   onChange(keyPath, newValue) {
@@ -296,7 +104,7 @@ class ObjectEditor extends Component {
       {!is(data, immudata) &&
         <div>
           <RaisedButton label='Revert' secondary onClick={_ => this.setState({data: immudata})} />
-          <RaisedButton label='Save' primary />
+          <RaisedButton label='Save' primary onClick={this.onSubmit} />
         </div>}
         <Dialog autoScrollBodyContent open={open} onRequestClose={this.onCloseAddPanel} >
         {!!keyPath && !!keyType &&
