@@ -7,6 +7,7 @@ import headlineReducer from 'components/Headlines/reducer';
 import twitterProfileReducer from 'components/Contacts/TwitterProfile/reducer';
 import publicationReducer from 'components/Publications/reducer';
 import searchReducer from 'components/Search/reducer';
+import schemaReducer from 'components/ObjectEditor/reducer';
 
 const rootReducer = combineReducers({
   personReducer,
@@ -15,7 +16,8 @@ const rootReducer = combineReducers({
   twitterProfileReducer,
   headlineReducer,
   publicationReducer,
-  searchReducer
+  searchReducer,
+  schemaReducer
 });
 
 export default rootReducer;

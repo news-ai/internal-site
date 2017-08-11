@@ -8,6 +8,8 @@ import TweetFeed from 'components/Contacts/Tweets/TweetFeed';
 import HeadlineFeed from 'components/Headlines/HeadlineFeed';
 import isURL from 'validator/lib/isURL';
 import FontIcon from 'material-ui/FontIcon';
+import RaisedButton from 'material-ui/RaisedButton';
+import Link from 'react-router/lib/Link';
 
 const orgStyles = {
   container: {display: 'block', margin: '10px 5px'},
@@ -119,6 +121,15 @@ class Contact extends Component {
       renderNode = (
       <div style={{backgroundColor: blueGrey50}} className='row horizontal-center'>
         <div style={{backgroundColor: '#ffffff'}} className='large-8 medium-10 small-12 columns' >
+          <Link to={{
+            pathname: '/edit',
+            query: {
+              schemaType: 'contacts',
+              id: contact.email
+            }
+          }} >
+            <RaisedButton primary className='right' label='Edit' />
+          </Link>
           <ContactView {...contact} twitter={twitter} />
           <div style={{padding: '10px 0', backgroundColor: lightBlue50}} >
             <span style={{color: grey700, marginLeft: 10}} >Recent Headlines</span>

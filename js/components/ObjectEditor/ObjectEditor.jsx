@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
 import dummydata from './data';
 import {fromJS, is, isImmutable, List, Map} from 'immutable';
 import TextField from 'material-ui/TextField';
+import withRouter from 'react-router/lib/withRouter';
 import Dialog from 'material-ui/Dialog';
 import IconButton from 'material-ui/IconButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import FontIcon from 'material-ui/FontIcon';
+import Checkbox from 'material-ui/Checkbox';
 import {grey300, grey500} from 'material-ui/styles/colors';
 import cn from 'classnames';
 import styled from 'styled-components';
@@ -20,14 +23,14 @@ import get from 'lodash/get';
 // array: ADD, DELETE, EDIT
 // object: EDIT, DELETE,
 
-const convert = mapping => Object
-.entries(mapping)
-.reduce((newMap, [key, val]) => {
-  newMap[key] = val.properties ? convert(val.properties) : val;
-  return newMap;
-}, {});
+// const convert = mapping => Object
+// .entries(mapping)
+// .reduce((newMap, [key, val]) => {
+//   newMap[key] = val.properties ? convert(val.properties) : val;
+//   return newMap;
+// }, {});
 
-const mapping = convert(map.data.md1.mappings.contacts.properties.data.properties);
+// const mapping = convert(map.data.md1.mappings.contacts.properties.data.properties);
 
 const ObjectBlock = styled.div`
   display: ${props => props.inline ? 'flex' : 'block'};
@@ -184,47 +187,49 @@ class Node extends Component {
   }
 }
 
-const KeyTypeObject = ({originalKeyPath, keyType, parentName, keyPath, onChange, data}) => {
-  if (typeof keyType.type === 'string') {
+class KeyTypeObject extends Component {
+  render() {
+    const {originalKeyPath, keyType, parentName, keyPath, onChange, data} = this.props;
+    if (typeof keyType.type === 'string') {
+      return (
+        <div className='vertical-center'>
+          <span className='text' style={{marginRight: 15}} >{parentName}</span>
+          <TextField
+          id={parentName}
+          disabled={data.hasIn([...originalKeyPath, parentName])}
+          placeholder={keyType.type}
+          type='text'
+          onChange={e => onChange(keyPath, e.target.value)}
+          />
+        </div>
+        );
+    }
+    const renderNodes = Object
+    .keys(keyType)
+    .map(typeName =>
+      <KeyTypeObject
+      keyPath={[...keyPath, typeName]}
+      parentName={typeName}
+      keyType={keyType[typeName]}
+      onChange={onChange}
+      data={data}
+      originalKeyPath={originalKeyPath}
+      />);
+
     return (
       <div>
-        <span>{parentName}: </span>
-        <TextField
-        id={parentName}
-        disabled={data.hasIn([...originalKeyPath, parentName])}
-        placeholder={keyType.type}
-        type='text'
-        onChange={e => onChange(keyPath, e.target.value)}
-        />
+      {renderNodes}
       </div>
       );
   }
-  const renderNodes = Object
-  .keys(keyType)
-  .map(typeName =>
-    <KeyTypeObject
-    keyPath={[...keyPath, typeName]}
-    parentName={typeName}
-    keyType={keyType[typeName]}
-    onChange={onChange}
-    data={data}
-    originalKeyPath={originalKeyPath}
-    />);
-
-  return (
-    <div>
-    {renderNodes}
-    </div>
-    );
-};
-
+}
 
 class ObjectEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: fromJS(dummydata.data),
-      immudata: fromJS(dummydata.data),
+      data: fromJS(this.props.rawData),
+      immudata: fromJS(this.props.rawData),
       open: false,
       keyPath: null,
       keyType: null
@@ -235,6 +240,10 @@ class ObjectEditor extends Component {
     this.onTempMapChange = this.onTempMapChange.bind(this);
     this.onCloseAddPanel = _ => this.setState({open: false, keyPath: null, keyType: null});
     this.handleRemoveClick = this.handleRemoveClick.bind(this);
+  }
+
+  componentWillMount() {
+    if (!this.props.schema) this.props.fetchSchema();
   }
 
   onChange(keyPath, newValue) {
@@ -262,7 +271,7 @@ class ObjectEditor extends Component {
     this.setState({data}, this.onCloseAddPanel);
   }
 
-  onTempMapChange(keyPath, newValue) {
+  onTempMapChange(keyPath, newValue, isArray, keyType) {
     const tempMap = typeof this.state.keyType.type === 'string' ? newValue : this.state.tempMap.setIn(keyPath, newValue);
     this.setState({tempMap});
   }
@@ -279,21 +288,21 @@ class ObjectEditor extends Component {
 
   render() {
     const {data, immudata, open, keyPath, keyType} = this.state;
-    return (
+    const {schema, rawData} = this.props;
+    // const schema = mapping;
+
+    return data && schema ? (
       <div>
-        EDITOR
       {!is(data, immudata) &&
         <div>
           <RaisedButton label='Revert' secondary onClick={_ => this.setState({data: immudata})} />
           <RaisedButton label='Save' primary />
         </div>}
-        <Dialog open={open} onRequestClose={this.onCloseAddPanel} >
+        <Dialog autoScrollBodyContent open={open} onRequestClose={this.onCloseAddPanel} >
         {!!keyPath && !!keyType &&
           <div>
-            <div>
-              <span>
-              PATH: {keyPath.join(' --> ')}
-              </span>
+            <div style={{margin: '15px 0'}} >
+              <span>PATH: {keyPath.join(' --> ')}</span>
               <div style={{display: 'inline-block', float: 'right'}} >
                 <PlainSelect disabled={!!data.getIn(keyPath)} innerRef={ref => this.whichObject = ref} defaultValue='object'>
                   <option value='object'>Object</option>
@@ -318,7 +327,7 @@ class ObjectEditor extends Component {
           </div>}
         </Dialog>
         <Node
-        schema={mapping}
+        schema={schema}
         data={data}
         immudata={immudata}
         keyPath={[]}
@@ -327,9 +336,27 @@ class ObjectEditor extends Component {
         handleRemoveClick={this.handleRemoveClick}
         />
       </div>
-    );
+    ) : <div>LOADING...</div>;
   }
 }
 
-
-export default ObjectEditor;
+export default connect(
+  ({schemaReducer, contactReducer}, {router}) => {
+    const {schemaType, id} = router.location.query;
+    let rawData, schema;
+    if (schemaType === 'contacts') {
+      rawData = contactReducer[id];
+      schema = schemaReducer[schemaType];
+    }
+    return {
+      rawData,
+      schema,
+    };
+  },
+  (dispatch, {router}) => {
+    const {schemaType, id} = router.location.query;
+    return {
+      fetchSchema: _ => dispatch({type: 'FETCH_SCHEMA', schemaType})
+    };
+  }
+  )(withRouter(ObjectEditor));

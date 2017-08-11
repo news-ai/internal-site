@@ -14,12 +14,13 @@ function contactReducer(state = initialState, action) {
     case contactConstant.REQUEST:
       return assignToEmpty(state, {
         isReceiving: true,
-        [action.email]: state[action.email] ? assignToEmpty(state[action.email], {isReceiving: true}) : {isReceiving: true}
+        // [action.email]: state[action.email] ? assignToEmpty(state[action.email], {isReceiving: true}) : {isReceiving: true}
       });
     case contactConstant.RECEIVE:
       return assignToEmpty(state, {
         isReceiving: false,
-        [action.email]: assignToEmpty(action.contact, {isReceiving: false}),
+        // [action.email]: assignToEmpty(action.contact, {isReceiving: false}),
+        [action.email]: action.contact,
         received: [...state.received.filter(e => e !== action.email), action.email]
       });
     case contactConstant.REQUEST_ABORT:
