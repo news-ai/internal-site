@@ -64,3 +64,16 @@ export const patchContact = (action$, {getState}) =>
       )
     )
   .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));
+
+export const postContact = (action$, {getState}) =>
+  action$.ofType('PATCH_CONTACT')
+  .filter(() => !getState().contactReducer.isReceiving)
+  .switchMap(({email, data}) =>
+    Observable.merge(
+      Observable.of({type: contactConstant.CREATE_REQUEST, data}),
+      Observable.fromPromise(api.post(`/database-contacts`, data))
+      .map(response => ({type: contactConstant.RECEIVE, email: response.data.email, contact: response.data}))
+      .catch(err => Observable.of({type: contactConstant.REQUEST_FAIL, message: err, email}))
+      )
+    )
+  .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));

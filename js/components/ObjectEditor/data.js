@@ -1,204 +1,145 @@
 const data = {
-  "data": {
-    "status": 200,
-    "email": "mike.isaac@nytimes.com",
-    "organizations": null,
-    "digitalFootprint": {
-      "topics": [{
-        "value": "@mikeisaac",
-        "provider": "aboutme"
-      }, {
-        "value": "Allthingsd",
-        "provider": "aboutme"
-      }, {
-        "value": "Facebook",
-        "provider": "aboutme"
-      }, {
-        "value": "Forbes",
-        "provider": "aboutme"
-      }, {
-        "value": "Journalism",
-        "provider": "aboutme"
-      }, {
-        "value": "Advertising",
-        "provider": "klout"
-      }, {
-        "value": "Digital Media",
-        "provider": "klout"
-      }, {
-        "value": "Marketing",
-        "provider": "klout"
-      }, {
-        "value": "San Francisco",
-        "provider": "klout"
-      }, {
-        "value": "Startups",
-        "provider": "klout"
-      }],
-      "scores": [{
-        "type": "general",
-        "value": 78,
-        "provider": "klout"
-      }]
-    },
-    "socialProfiles": [{
-      "username": "mikeisaac",
-      "bio": "\u003cp\u003eBrand \u0026amp; Insights @GatesFoundation. Design, branding, tech, global affairs, coffee, food, innovation, SEA, LDN \u0026amp; other goodies.\u003c/p\u003e",
-      "typeId": "aboutme",
-      "url": "https://about.me/mikeisaac",
-      "typeName": "About.me",
-      "type": "aboutme"
+  "organizations": [{
+    "startDate": "2017",
+    "name": "Axios",
+    "title": "Technology Reporter"
+  }],
+  "digitalFootprint": {
+    "topics": [{
+      "value": "AngelList",
+      "provider": "klout"
     }, {
-      "typeId": "facebook",
-      "url": "https://www.facebook.com/mikejisaac",
-      "typeName": "Facebook",
-      "type": "facebook"
+      "value": "Lyft",
+      "provider": "klout"
     }, {
-      "username": "mike_isaac",
-      "typeId": "flickr",
-      "url": "https://www.flickr.com/people/57672861@N03",
-      "typeName": "Flickr",
-      "type": "flickr",
-      "id": "57672861@N03"
+      "value": "Technology",
+      "provider": "klout"
     }, {
-      "typeId": "foursquare",
-      "url": "https://foursquare.com/user/2414351",
-      "typeName": "Foursquare",
-      "type": "foursquare",
-      "id": "2414351"
+      "value": "Uber",
+      "provider": "klout"
     }, {
-      "typeId": "google",
-      "url": "https://plus.google.com/112639654397487285054",
-      "typeName": "GooglePlus",
-      "type": "google",
-      "id": "112639654397487285054"
-    }, {
-      "username": "mikeisaac",
-      "bio": "Senior Editor, somewhere.",
-      "typeId": "gravatar",
-      "url": "https://gravatar.com/mikeisaac",
-      "typeName": "Gravatar",
-      "type": "gravatar",
-      "id": "16057919"
-    }, {
-      "typeId": "instagram",
-      "url": "https://instagram.com/mike_isaac",
-      "typeName": "Instagram",
-      "type": "instagram"
-    }, {
-      "username": "MikeIsaac",
-      "typeId": "klout",
-      "url": "http://klout.com/MikeIsaac",
-      "typeName": "Klout",
-      "type": "klout",
-      "id": "527217"
-    }, {
-      "username": "mike-isaac/22/869/784",
-      "typeId": "linkedin",
-      "url": "https://www.linkedin.com/pub/mike-isaac/22/869/784",
-      "typeName": "LinkedIn",
-      "type": "linkedin",
-      "id": "79767316"
-    }, {
-      "username": "isaacmike",
-      "bio": "Design, branding, technology, innovation, sport, Seattle, London and other goodness.",
-      "typeId": "pinterest",
-      "url": "http://www.pinterest.com/isaacmike/",
-      "typeName": "Pinterest",
-      "type": "pinterest"
-    }, {
-      "username": "mike-isaac-1",
-      "typeId": "quora",
-      "url": "http://www.quora.com/mike-isaac-1",
-      "typeName": "Quora",
-      "type": "quora"
-    }, {
-      "username": "mikeisaac",
-      "typeId": "tumblr",
-      "url": "http://mikeisaac.tumblr.com",
-      "typeName": "Tumblr",
-      "type": "tumblr"
-    }, {
-      "username": "MikeIsaac",
-      "bio": "I write about startups, venture capital and e-commerce. All DMs Accepted. mike.isaac@nytimes.com",
-      "typeId": "twitter",
-      "url": "https://twitter.com/MikeIsaac",
-      "typeName": "Twitter",
-      "type": "twitter",
-      "id": "19040598"
+      "value": "Venturebeat",
+      "provider": "klout"
     }],
-    "demographics": {
-      "locationDeduced": {
-        "city": {
-          "name": "New York"
-        },
-        "country": {
-          "code": "US",
-          "name": "United States",
-          "deduced": false
-        },
-        "deducedLocation": "New York, New York, United States",
-        "state": {
-          "code": "NY",
-          "name": "New York"
-        },
-        "normalizedLocation": "New York, New York, United States",
-        "likelihood": 1,
-        "continent": {
-          "name": "North America",
-          "deduced": true
-        }
-      },
-      "gender": "Male",
-      "locationGeneral": "New York, New York, United States"
-    },
-    "photos": [{
-      "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/860843f021ca5856eac37455912bc6d5_fb1715f984b8b1bc67da7a5c2bd5cf354da36e1ec3a20ecb3e1992b514e943eb",
-      "typeId": "facebook",
-      "isPrimary": true,
-      "type": "facebook",
-      "typeName": "Facebook"
-    }, {
-      "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/f67e4400433c26851894183852f3b9c5_854a41db0fb0ca15f16b8b54ff8c83f82084245dd4580b870ae4f0e4908e2501",
-      "typeId": "google",
-      "type": "google",
-      "typeName": "GooglePlus"
-    }, {
-      "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/af308d7343557a939f4aef0d0e1fa718_3f8f32d35140f7dc12c46caae65978f7eaa99a0bd6e1e92dcccc131c7ece3dd0",
-      "typeId": "twitter",
-      "type": "twitter",
-      "typeName": "Twitter"
-    }, {
-      "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/f06846c952dde0f37c806c797c8115fe_5d6bc64f9d26f41d4cb3185ab4da1777df16b21aa98b35173ca073f785fb3929",
-      "typeId": "gravatar",
-      "type": "gravatar",
-      "typeName": "Gravatar"
-    }, {
-      "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/c0e18387db6c555aff631058381e8cbf_78a72c93628a7b1bfa38bde4aaf721712707b0842d5d18e2504910ca0b82fd0a",
-      "typeId": "foursquare",
-      "type": "foursquare",
-      "typeName": "Foursquare"
-    }],
-    "requestId": "b055457c-ec1d-4339-86f6-d4fb74b79a47",
-    "contactInfo": {
-      "givenName": "Mike",
-      "fullName": "Mike Isaac",
-      "familyName": "Isaac",
-      "websites": null
-    },
-    "likelihood": 0.88,
-    "writingInformation": {
-      "beats": ["Technology"],
-      "occasionalBeats": ["Consumer Tech"],
-      "isFreelancer": false,
-      "isInfluencer": false,
-      "rss": ["https://www.nytimes.com/svc/collections/v1/publish/http://www.nytimes.com/by/mike-isaac/rss.xml"]
-    },
-    "toUpdate": false,
-    "isOutdated": false,
-    "created": "2017-06-28T00:01:58.709996689Z",
-    "updated": "2017-06-28T02:41:32.238350639Z"
+    "scores": [{
+      "type": "general",
+      "value": 60,
+      "provider": "klout"
+    }]
   },
-  "included": null
+  "socialProfiles": [{
+    "username": "kia-kokalitcheva",
+    "typeId": "angellist",
+    "url": "https://angel.co/kia-kokalitcheva",
+    "typeName": "AngelList",
+    "type": "angellist",
+    "id": "281956"
+  }, {
+    "username": "imkialikethecar",
+    "typeId": "github",
+    "url": "https://github.com/imkialikethecar",
+    "typeName": "Github",
+    "type": "github"
+  }, {
+    "bio": "UC Berkeley senior, coffee lover, music listener, Wednesday noon dancer, and other things :)",
+    "typeId": "google",
+    "url": "https://plus.google.com/118229697669024257661",
+    "typeName": "GooglePlus",
+    "type": "google",
+    "id": "118229697669024257661"
+  }, {
+    "username": "imkialikethecar",
+    "typeId": "gravatar",
+    "url": "https://gravatar.com/imkialikethecar",
+    "typeName": "Gravatar",
+    "type": "gravatar",
+    "id": "61401281"
+  }, {
+    "username": "imkialikethecar",
+    "typeId": "klout",
+    "url": "http://klout.com/imkialikethecar",
+    "typeName": "Klout",
+    "type": "klout",
+    "id": "32369627087175405"
+  }, {
+    "username": "kiakokalitcheva",
+    "bio": "(Note: if you're reaching out about tech news, please do so to my work email, not on LinkedIn. Thanks.) UC Berkeley alumna, (Silicon) Valley girl, and technology reporter who took a winding path to find her calling. Personal interests (sometimes addictions) include media, publications, pop culture, fashion, arts, dance, music and writing, and never misses an opportunity to make a pun or a clever joke! You can also find her working through Codecademy courses, overcoming her lack of natural programming skillsâ€¦ Feel free to peek at her blog (link above) for a glimpse at her thoughts, ramblings and projects with which she tinkers â€” when not busy checking Twitter too much or creating way too many Tumblr blogs.",
+    "typeId": "linkedin",
+    "url": "https://www.linkedin.com/in/kiakokalitcheva",
+    "typeName": "LinkedIn",
+    "type": "linkedin",
+    "id": "80846178"
+  }, {
+    "username": "imkialikethecar",
+    "bio": "Hello. I'm Kia (like the car) and this is my Twitter. I'm a #Cal alumna (Go Bears!), #SiliconValley girl, and have too many interests to list them!",
+    "typeId": "twitter",
+    "url": "https://twitter.com/imkialikethecar",
+    "typeName": "Twitter",
+    "type": "twitter",
+    "id": "245697392"
+  }],
+  "demographics": {
+    "locationDeduced": {
+      "city": {
+        "name": "San Francisco"
+      },
+      "country": {
+        "code": "US",
+        "name": "United States",
+        "deduced": false
+      },
+      "deducedLocation": "San Francisco, California, United States",
+      "state": {
+        "code": "CA",
+        "name": "California"
+      },
+      "normalizedLocation": "San Francisco, California, United States",
+      "likelihood": 1,
+      "continent": {
+        "name": "North America",
+        "deduced": true
+      }
+    },
+    "gender": "Female",
+    "locationGeneral": "San Francisco, California, United States"
+  },
+  "photos": [{
+    "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/db025b8d16418f3c9b3fd404c977516b_f68c6854cd31a15acd3907c921bb68eed776d61459005d6af7a5c7d71da841e2",
+    "typeId": "linkedin",
+    "isPrimary": true,
+    "type": "linkedin",
+    "typeName": "LinkedIn"
+  }, {
+    "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/fe4211d62b93d5625e74f102b03dd8a8_a34e7464f1ec64ebc325f46252455bc52c4361be1c2dfc1d82062334710440af",
+    "typeId": "gravatar",
+    "type": "gravatar",
+    "typeName": "Gravatar"
+  }, {
+    "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/b866f84561e265810e7d99e985e66f7c_14e510322202aee118a90b25b47323f694b7942b065c506ca5786721ba4f01d0",
+    "typeId": "twitter",
+    "type": "twitter",
+    "typeName": "Twitter"
+  }, {
+    "url": "https://d2ojpxxtu63wzl.cloudfront.net/static/274b4d5a7c404c43d3e0ba5fb16502ad_9700139019e26fc2b500f3a354d8760a549c129facfd47d1177d6a7f93ddbdc3",
+    "typeId": "google",
+    "type": "google",
+    "typeName": "GooglePlus"
+  }],
+  "requestId": "5e7731a6-173b-4893-98c2-c1e8197628c4",
+  "contactInfo": {
+    "givenName": "Kia",
+    "fullName": "Kia Kokalitcheva",
+    "familyName": "Kokalitcheva",
+    "websites": [{
+      "url": "http://fortune.com/author/kia-kokalitcheva"
+    }]
+  },
+  "writingInformation": {
+    "beats": ["Technology"],
+    "occasionalBeats": [],
+    "isFreelancer": false,
+    "isInfluencer": false,
+    "rss": null
+  }
 };
 export default data;

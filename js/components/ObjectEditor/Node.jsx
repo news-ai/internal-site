@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {is, List, Map} from 'immutable';
 import TextField from 'material-ui/TextField';
 import FontIcon from 'material-ui/FontIcon';
-import {grey300, grey500} from 'material-ui/styles/colors';
+import {grey300, grey500, blue500} from 'material-ui/styles/colors';
 import styled from 'styled-components';
 
 // FETCH endpoint
@@ -30,6 +30,11 @@ const ObjectBlock = styled.div`
   white-space: nowrap;
 `;
 
+const NullDiv = styled.div`
+  margin-left: 10px;
+  cursor: pointer;
+`;
+
 const GreenDiv = styled.div`
   cursor: pointer;
   color: green;
@@ -38,6 +43,10 @@ const GreenDiv = styled.div`
 const BlueDiv = styled.div`
   cursor: pointer;
   color: blue;
+`;
+
+const BlueSpan = styled.span`
+  color: ${blue500};
 `;
 
 const NodeContainer = styled.div`
@@ -76,8 +85,9 @@ class Node extends Component {
     if (List.isList(data)) {
       nodes = data.map((child, i) => {
         return (
-          <div style={{display: 'block', marginLeft: 10}} >
+          <ObjectBlock key={`block-${keyPath.join('-')}-${i}`}>
             <FontIcon
+            key={`icon-${keyPath.join('-')}-${i}`}
             onClick={_ => handleRemoveClick([...keyPath, i])}
             color={grey300}
             hoverColor={grey500}
@@ -86,6 +96,7 @@ class Node extends Component {
             />
             <span className='text' style={{color: 'green'}} >{i}: </span>
             <Node
+            key={`node-${keyPath.join('-')}-${i}`}
             schema={schema}
             keyPath={[...keyPath, i]}
             data={child}
@@ -94,7 +105,7 @@ class Node extends Component {
             handleAddClick={handleAddClick}
             handleRemoveClick={handleRemoveClick}
             />
-          </div>
+          </ObjectBlock>
           );
       });
       renderNodes = open ? [
@@ -109,16 +120,18 @@ class Node extends Component {
       nodes = data.entrySeq().map(([key, val]) => {
         const isProperty = !Map.isMap(val) && !List.isList(val);
         return (
-        <ObjectBlock inline={isProperty} >
+        <ObjectBlock inline={isProperty} key={`block-${keyPath.join('-')}-${key}`}>
           <FontIcon
+          key={`icon-${keyPath.join('-')}-${key}`}
           onClick={_ => handleRemoveClick([...keyPath, key])}
           color={grey300}
           hoverColor={grey500}
           className='fa fa-times pointer'
           style={{fontSize: '0.9em', marginRight: 5}}
           />
-          <span style={{color: 'blue'}} >{key}: </span>
+          <BlueSpan style={{color: 'blue'}} >{key}: </BlueSpan>
           <Node
+          key={`node-${keyPath.join('-')}-${key}`}
           schema={schema}
           keyPath={[...keyPath, key]}
           data={val}
@@ -148,7 +161,7 @@ class Node extends Component {
       ] : <BlueDiv onClick={this.onOpen} >{'{ ... }'}</BlueDiv>;
     } else {
       if (data === null) {
-        return <div className='pointer' style={{marginLeft: 10}} onClick={_ => handleAddClick(keyPath, keyType)} >null</div>;
+        return <NullDiv onClick={_ => handleAddClick(keyPath, keyType)} >null</NullDiv>;
       }
       return (
         <TextField

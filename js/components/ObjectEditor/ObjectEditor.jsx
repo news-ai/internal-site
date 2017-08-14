@@ -2,11 +2,13 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {fromJS, is, List, Map} from 'immutable';
 import withRouter from 'react-router/lib/withRouter';
+import Link from 'react-router/lib/Link';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
-import {grey300, grey500} from 'material-ui/styles/colors';
 import styled from 'styled-components';
+import dummydata from './data';
 
+import PlainSelect from 'components/PlainSelect';
 import Node from './Node';
 import KeyTypeObject from './KeyTypeObject';
 
@@ -17,15 +19,6 @@ import KeyTypeObject from './KeyTypeObject';
 //
 // array: ADD, DELETE, EDIT
 // object: EDIT, DELETE,
-
-const PlainSelect = styled.select`
-  height: auto;
-  width: auto;
-  padding: auto;
-  appearance: menulist;
-  MozAppearance: menulist;
-  WebkitAppearance: menulist;
-`;
 
 class ObjectEditor extends Component {
   constructor(props) {
@@ -110,7 +103,7 @@ class ObjectEditor extends Component {
     return (
       <div>
       {!is(data, immudata) &&
-        <div>
+        <div className='right'>
           <RaisedButton label='Revert' secondary onClick={_ => this.setState({data: immudata})} />
           <RaisedButton label='Save' primary onClick={this.onSubmit} />
         </div>}
@@ -156,12 +149,18 @@ class ObjectEditor extends Component {
   }
 }
 
+const Label = styled.div`
+  display: block;
+  margin: 10px;
+`;
+
 // THIS IS FETCHING LAYER
 class ObjectEditorContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      previousEdits: []
+      previousEdits: [],
+      useDummy: false
     };
     this.updateData = this.updateData.bind(this);
     this.revertChange = this.revertChange.bind(this);
@@ -173,7 +172,7 @@ class ObjectEditorContainer extends Component {
   }
 
   updateData(data, prevData) {
-    this.props.patchObject(data.toJS());
+    this.props.sendObject(data.toJS());
     this.setState({
       previousEdits: [...this.state.previousEdits, prevData]
     });
@@ -190,15 +189,44 @@ class ObjectEditorContainer extends Component {
   }
 
   render() {
-    const {schema, rawData} = this.props;
-    const {previousEdits} = this.state;
+    const {schema, rawData, schemaType, id} = this.props;
+    const {previousEdits, useDummy} = this.state;
 
-    return schema && rawData ?
-    <div>
-    {previousEdits.length > 0 &&
-      <RaisedButton label='Revert Submitted' secondary onClick={this.revertChange} />}
-      <ObjectEditor updateData={this.updateData} {...this.props} />
-    </div> : <div>LOADING</div>;
+    if (schemaType && id) {
+      return schema && rawData ?
+      <div>
+      {previousEdits.length > 0 &&
+        <RaisedButton label='Revert Submitted' secondary onClick={this.revertChange} />}
+        <div>
+          <Label>Type: {schemaType}</Label>
+          <Label>ID: {id}</Label>
+        </div>
+        <ObjectEditor updateData={this.updateData} {...this.props} />
+      </div> : <div>LOADING</div>;
+    } else {
+      const selector = (
+        <div>
+          <span>Select Type to Create: </span>
+          <Link to={{pathname: '/edit', query: {schemaType: 'contacts'}}} >Contact</Link>
+        </div>
+        );
+      switch (schemaType) {
+        case 'contacts':
+          return schema ? (
+            <div>
+              <RaisedButton className='right' label={useDummy ? 'Clear Placeholder' : 'Use Placehodler Data'} onClick={_ => this.setState({useDummy: !useDummy})} />
+              <Label>Create New Contact</Label>
+              <ObjectEditor
+              updateData={this.updateData}
+              schema={schema}
+              rawData={useDummy ? dummydata : {}}
+              />
+            </div>
+            ) : <div>LOADING... </div>;
+        default:
+          return selector;
+      }
+    }
   }
 }
 
@@ -213,6 +241,8 @@ export default connect(
     return {
       rawData,
       schema,
+      schemaType,
+      id
     };
   },
   (dispatch, {router}) => {
@@ -220,6 +250,7 @@ export default connect(
     return {
       fetchSchema: _ => dispatch({type: 'FETCH_SCHEMA', schemaType}),
       fetchObject: _ => {
+        if (!id) return undefined;
         switch (schemaType) {
           case 'contacts':
             return dispatch({type: 'FETCH_CONTACT', email: id, useCache: false});
@@ -227,14 +258,15 @@ export default connect(
             return undefined;
         }
       },
-      patchObject: data => {
+      sendObject: data => {
         switch (schemaType) {
           case 'contacts':
+            if (!id) return dispatch({type: 'POST_CONTACT', data});
             return dispatch({type: 'PATCH_CONTACT', email: id, data});
           default:
             return undefined;
         }
-      }
+      },
     };
   }
   )(withRouter(ObjectEditorContainer));
