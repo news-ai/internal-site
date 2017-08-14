@@ -66,7 +66,7 @@ export const patchContact = (action$, {getState}) =>
   .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));
 
 export const postContact = (action$, {getState}) =>
-  action$.ofType('PATCH_CONTACT')
+  action$.ofType('POST_CONTACT')
   .filter(() => !getState().contactReducer.isReceiving)
   .switchMap(({email, data}) =>
     Observable.merge(

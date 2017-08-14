@@ -42,7 +42,6 @@ class ObjectEditor extends Component {
 
   componentWillReceiveProps(nextProps) {
     const data = fromJS(nextProps.rawData);
-    console.log('get new');
     if (!is(data, this.state.immudata)) {
       // reset data when receive new ones
       this.setState({data, immudata: data});
@@ -116,7 +115,6 @@ class ObjectEditor extends Component {
                 <PlainSelect disabled={!!data.getIn(keyPath)} innerRef={ref => this.whichObject = ref} defaultValue='object'>
                   <option value='object'>Object</option>
                   <option value='array'>Array</option>
-                  <option value='string'>String</option>
                 </PlainSelect>
               </div>
             </div>
@@ -154,6 +152,8 @@ const Label = styled.div`
   margin: 10px;
 `;
 
+const contactLink = {pathname: '/edit', query: {schemaType: 'contacts'}};
+
 // THIS IS FETCHING LAYER
 class ObjectEditorContainer extends Component {
   constructor(props) {
@@ -163,6 +163,7 @@ class ObjectEditorContainer extends Component {
       useDummy: false
     };
     this.updateData = this.updateData.bind(this);
+    this.postData = this.postData.bind(this);
     this.revertChange = this.revertChange.bind(this);
   }
 
@@ -176,6 +177,18 @@ class ObjectEditorContainer extends Component {
     this.setState({
       previousEdits: [...this.state.previousEdits, prevData]
     });
+  }
+
+  postData(data, prevData) {
+    const json = data.toJS();
+    this.props.sendObject(json);
+    this.setState({
+      previousEdits: [...this.state.previousEdits, prevData]
+    });
+    this.props.router.push({pathname: '/edit', query: {
+      schemaType: this.props.schemaType,
+      id: json.email
+    }});
   }
 
   revertChange() {
@@ -207,17 +220,17 @@ class ObjectEditorContainer extends Component {
       const selector = (
         <div>
           <span>Select Type to Create: </span>
-          <Link to={{pathname: '/edit', query: {schemaType: 'contacts'}}} >Contact</Link>
+          <Link to={contactLink} >Contact</Link>
         </div>
         );
       switch (schemaType) {
         case 'contacts':
           return schema ? (
             <div>
-              <RaisedButton className='right' label={useDummy ? 'Clear Placeholder' : 'Use Placehodler Data'} onClick={_ => this.setState({useDummy: !useDummy})} />
               <Label>Create New Contact</Label>
+              <RaisedButton label={useDummy ? 'Clear Placeholder' : 'Use Placehodler Data'} onClick={_ => this.setState({useDummy: !useDummy})} />
               <ObjectEditor
-              updateData={this.updateData}
+              updateData={this.postData}
               schema={schema}
               rawData={useDummy ? dummydata : {}}
               />
