@@ -52,6 +52,43 @@ const organizationInfoShape = {
   }
 };
 
+
+const socialProfileInfoShape = {
+  socialProfiles: {
+    objectType: 'array',
+    objectShape: {
+      'Social Profile Bio': {
+        objectType: 'string',
+        keyPath: ['bio']
+      },
+      'ID': {
+        objectType: 'string',
+        keyPath: ['id']
+      },
+      'Social Network ID': {
+        objectType: 'string',
+        placeholder: 'twitter',
+        keyPath: ['type']
+      },
+      'Social Network Name': {
+        objectType: 'string',
+        placeholder: 'Twitter',
+        keyPath: ['typeName']
+      },
+      'URL': {
+        objectType: 'string',
+        placeholder: 'https://twitter.com/imkialikethecar',
+        keyPath: ['url']
+      },
+      'Username': {
+        objectType: 'string',
+        keyPath: ['username']
+      },
+    },
+    keyPath: ['contactInfo', 'socialProfiles']
+  }
+};
+
 const Node = ({item, onChange, keyPath, base}) => {
   return Object.entries(item)
     .map(([name, shape]) => {
@@ -128,6 +165,7 @@ class AddContact extends Component {
       <div>
         <Section title='Contact Info' schema={contactInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Organization Info' schema={organizationInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
+        <Section title='Social Profiles' schema={socialProfileInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
       </div>
     );
   }
