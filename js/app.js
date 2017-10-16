@@ -46,10 +46,10 @@ import Contact from 'components/Contacts/Contact';
 import Home from 'components/Home/Home';
 import SearchResults from 'components/Search/SearchResults';
 import ObjectEditor from 'components/ObjectEditor/ObjectEditor';
+import AddContainer from 'components/ObjectEditor/AddContainer';
+import AddContact from 'components/ObjectEditor/AddContact';
 
 import MultiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import injectTapEventPlugin from 'react-tap-event-plugin';
-injectTapEventPlugin();
 
 // Import the CSS file, which HtmlWebpackPlugin transfers to the build folder
 import '../css/main.css';
@@ -57,12 +57,6 @@ import '../css/main.css';
 const store = configureStore();
 
 window.TABULAE_API_BASE = process.env.NODE_ENV === 'development' ? `https://dev-dot-newsai-1166.appspot.com/api` : `https://tabulae.newsai.org/api`;
-// window.TABULAE_HOME = window.isDev ? `https://tabulae-dev.newsai.co` : `https://tabulae.newsai.co`;
-
-
-// third-party services setups
-// if (!window.isDev) Raven.config('https://c6c781f538ef4b6a952dc0ad3335cf61@sentry.io/100317').install();
-
 
 // Make reducers hot reloadable, see http://stackoverflow.com/questions/34243684/make-redux-reducers-and-other-non-components-hot-loadable
 if (module.hot) {
@@ -86,6 +80,10 @@ const Base = () => (
           </Route>
           <Route path='search' name='Search Results' component={SearchResults} />
           <Route path='edit' name='Search Results' component={ObjectEditor} />
+          <Route path='add' name='Add' >
+            <IndexRoute component={AddContainer} />
+            <Route path='contact' component={AddContact} />
+          </Route>
         </Route>
       </Router>
     </Provider>

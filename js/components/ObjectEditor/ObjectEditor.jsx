@@ -11,6 +11,7 @@ import dummydata from './data';
 import PlainSelect from 'components/PlainSelect';
 import Node from './Node';
 import KeyTypeObject from './KeyTypeObject';
+import plugin from './plugin';
 
 // FETCH endpoint
 // PATCH endpoint
@@ -80,7 +81,22 @@ class ObjectEditor extends Component {
   }
 
   onTempMapChange(keyPath, newValue) {
-    const tempMap = typeof this.state.keyType.type === 'string' ? newValue : this.state.tempMap.setIn(keyPath, newValue);
+    console.log(keyPath);
+    console.log(keyPath.slice(0, -1));
+    const pluginKey = keyPath.slice(0, -1).join('.');
+    console.log(plugin[pluginKey]);
+    console.log(this.state.keyType.type);
+    const pluginType = plugin[pluginKey];
+    console.log(pluginKey);
+    console.log(pluginType);
+    console.log(newValue);
+    let tempMap;
+    if (typeof this.state.keyType.type === 'string') {
+      tempMap = newValue;
+    } else {
+      tempMap = this.state.tempMap.setIn(keyPath, newValue);
+    }
+    // const tempMap = typeof this.state.keyType.type === 'string' ? newValue : this.state.tempMap.setIn(keyPath, newValue);
     this.setState({tempMap});
   }
 
@@ -126,6 +142,7 @@ class ObjectEditor extends Component {
               keyPath={[]}
               parentName={keyPath[keyPath.length - 1]}
               keyType={keyType}
+              plugin={plugin}
               />
             </div>
             <div className='right'>
@@ -182,9 +199,9 @@ class ObjectEditorContainer extends Component {
   postData(data, prevData) {
     const json = data.toJS();
     this.props.sendObject(json);
-    this.setState({
-      previousEdits: [...this.state.previousEdits, prevData]
-    });
+    // this.setState({
+    //   previousEdits: [...this.state.previousEdits, prevData]
+    // });
     this.props.router.push({pathname: '/edit', query: {
       schemaType: this.props.schemaType,
       id: json.email
@@ -204,6 +221,8 @@ class ObjectEditorContainer extends Component {
   render() {
     const {schema, rawData, schemaType, id} = this.props;
     const {previousEdits, useDummy} = this.state;
+    console.log(schema);
+    console.log(schemaType);
 
     if (schemaType && id) {
       return schema && rawData ?
@@ -229,11 +248,7 @@ class ObjectEditorContainer extends Component {
             <div>
               <Label>Create New Contact</Label>
               <RaisedButton label={useDummy ? 'Clear Placeholder' : 'Use Placehodler Data'} onClick={_ => this.setState({useDummy: !useDummy})} />
-              <ObjectEditor
-              updateData={this.postData}
-              schema={schema}
-              rawData={useDummy ? dummydata : {}}
-              />
+              <ObjectEditor updateData={this.postData} schema={schema} rawData={useDummy ? dummydata : {}} />
             </div>
             ) : <div>LOADING... </div>;
         default:

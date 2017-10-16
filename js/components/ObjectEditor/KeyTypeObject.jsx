@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 class KeyTypeObject extends Component {
   render() {
-    const {originalKeyPath, keyType, parentName, keyPath, onChange, data} = this.props;
+    const {originalKeyPath, keyType, parentName, keyPath, onChange, data, plugin} = this.props;
     if (typeof keyType.type === 'string') {
       return (
         <div className='vertical-center'>
@@ -22,15 +22,27 @@ class KeyTypeObject extends Component {
     }
     const renderNodes = Object
     .keys(keyType)
-    .map(typeName =>
-      <KeyTypeObject
-      keyPath={[...keyPath, typeName]}
-      parentName={typeName}
-      keyType={keyType[typeName]}
-      onChange={onChange}
-      data={data}
-      originalKeyPath={originalKeyPath}
-      />);
+    .map(typeName => {
+      const pluginKey = [...keyPath, typeName].join('.');
+      return (<div style={{marginLeft: 15}} >
+        <div>
+        {typeof keyType[typeName].type !== 'string' &&
+          <span>{typeName}: </span>}
+        {typeof plugin[pluginKey] === 'string' &&
+          <span style={{color: 'red'}} >({plugin[pluginKey]})</span>}
+        </div>
+        <KeyTypeObject
+        keyPath={[...keyPath, typeName]}
+        parentName={typeName}
+        keyType={keyType[typeName]}
+        onChange={onChange}
+        data={data}
+        originalKeyPath={originalKeyPath}
+        plugin={plugin}
+        />
+      </div>
+      );
+    });
 
     return (
       <div>

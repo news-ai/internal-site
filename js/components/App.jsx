@@ -60,6 +60,9 @@ class App extends Component {
               <HomeButton>
                 <Link to='/edit'>Edit</Link>
               </HomeButton>
+              <HomeButton>
+                <Link to='/add'>Add</Link>
+              </HomeButton>
             </TopBar>
             {this.props.children}
           </div>
