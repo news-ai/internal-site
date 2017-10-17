@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Map, List, fromJS} from 'immutable';
 import TextField from 'material-ui/TextField';
-import IconButton from 'material-ui/IconButton';
+import RaisedButton from 'material-ui/RaisedButton';
 import FontIcon from 'material-ui/FontIcon';
 import {grey500, grey700} from 'material-ui/styles/colors';
 // import contacts from './50contacts';
@@ -56,6 +56,20 @@ const socialProfileInfoShape = {
   socialProfiles: {
     objectType: 'array',
     objectShape: {
+      'Social Network ID': {
+        objectType: 'string',
+        placeholder: 'e.g. twitter',
+        keyPath: ['type']
+      },
+      'Social Network Name': {
+        objectType: 'string',
+        placeholder: 'e.g. Twitter',
+        keyPath: ['typeName']
+      },
+      'Username': {
+        objectType: 'string',
+        keyPath: ['username']
+      },
       'Social Profile Bio': {
         objectType: 'string',
         keyPath: ['bio']
@@ -64,24 +78,10 @@ const socialProfileInfoShape = {
         objectType: 'string',
         keyPath: ['id']
       },
-      'Social Network ID': {
-        objectType: 'string',
-        placeholder: 'twitter',
-        keyPath: ['type']
-      },
-      'Social Network Name': {
-        objectType: 'string',
-        placeholder: 'Twitter',
-        keyPath: ['typeName']
-      },
       'URL': {
         objectType: 'string',
         placeholder: 'https://twitter.com/imkialikethecar',
         keyPath: ['url']
-      },
-      'Username': {
-        objectType: 'string',
-        keyPath: ['username']
       },
     },
     keyPath: ['socialProfiles']
@@ -116,10 +116,11 @@ const Node = ({item, onChange, keyPath, base}) => {
     console.log(base.getIn([...keyPath, ...shape.keyPath]));
     return (
       <TextField
+      floatingLabelFixed
       name={name}
       value={base.getIn([...keyPath, ...shape.keyPath])}
       floatingLabelText={name}
-      hintText={shape.objectType}
+      hintText={shape.placeholder || shape.objectType}
       onChange={e => onChange(e.target.value, [...keyPath, ...shape.keyPath])}
       />
     );
@@ -129,7 +130,7 @@ const Node = ({item, onChange, keyPath, base}) => {
 const Section = ({title, onChange, onDelete, base, schema}) => {
   return (
      <div style={{marginLeft: 20}} >
-      <h4>{title}</h4>
+      <h5>{title}</h5>
       {Object.entries(schema).map(([name, shape]) => {
         if (shape.objectType === 'array') {
           const list = base.getIn(shape.keyPath);
@@ -140,26 +141,42 @@ const Section = ({title, onChange, onDelete, base, schema}) => {
                 {typeof shape.objectShape === 'string' ?
                   [
                     ...list.map((listVal, i) =>
-                      <TextField
-                      name={`${name}-${i}`}
-                      value={base.getIn([...shape.keyPath, i])}
-                      floatingLabelText={name}
-                      hintText={shape.objectShape}
-                      onChange={e => onChange(e.target.value, [...shape.keyPath, i])}
-                      />),
-                      <TextField
-                      name={`${name}-${list.size}`}
-                      value={base.getIn([...shape.keyPath, list.size])}
-                      floatingLabelText={name}
-                      hintText={shape.objectShape}
-                      onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
-                      />
+                      <span>
+                        <TextField
+                        floatingLabelFixed
+                        name={`${name}-${i}`}
+                        value={base.getIn([...shape.keyPath, i])}
+                        floatingLabelText={name}
+                        hintText={shape.objectShape}
+                        onChange={e => onChange(e.target.value, [...shape.keyPath, i])}
+                        />
+                        <FontIcon
+                        className='fa fa-times pointer right'
+                        color={grey500}
+                        hoverColor={grey700}
+                        onClick={_ => onDelete([...shape.keyPath, i])}
+                        />
+                      </span>
+                      ),
+                    <TextField
+                    floatingLabelFixed
+                    name={`${name}-${list.size}`}
+                    value={base.getIn([...shape.keyPath, list.size])}
+                    floatingLabelText={name}
+                    hintText={shape.objectShape}
+                    onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
+                    />
                   ] :
                   [
                     ...list.map((listVal, i) =>
-                      <div>
+                      <div style={{border: '1px solid grey', padding: 5, margin: 5}} >
                         <Node base={base} keyPath={[...shape.keyPath, i]} item={shape.objectShape} onChange={onChange} />
-                        <FontIcon className='fa fa-times pointer' color={grey500} hoverColor={grey700} onClick={_ => onDelete([...shape.keyPath, i])} />
+                        <FontIcon
+                        className='fa fa-times pointer right'
+                        color={grey500}
+                        hoverColor={grey700}
+                        onClick={_ => onDelete([...shape.keyPath, i])}
+                        />
                       </div>
                     ),
                     <Node base={base} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} onChange={onChange} />
@@ -171,6 +188,7 @@ const Section = ({title, onChange, onDelete, base, schema}) => {
             <div>
               <div>{name}</div>
               <TextField
+              floatingLabelFixed
               name={`${name}-0`}
               value={base.getIn([...shape.keyPath, 0])}
               floatingLabelText={name}
@@ -187,6 +205,7 @@ const Section = ({title, onChange, onDelete, base, schema}) => {
         return (
           <div>
             <TextField
+            floatingLabelFixed
             name={name}
             floatingLabelText={name}
             value={base.getIn(shape.keyPath)}
@@ -225,13 +244,26 @@ class AddContact extends Component {
   }
 
   render() {
-    console.log(JSON.stringify(this.state.base.toJS(), 2));
+    console.log(JSON.stringify(this.state.base.toJS(), null, 2));
     return (
       <div>
+        <div style={{marginLeft: 20}} >
+          <TextField
+          floatingLabelFixed
+          name='email'
+          value={this.state.base.getIn(['email'])}
+          floatingLabelText='Email'
+          hintText='string'
+          onChange={e => this.onChange(e.target.value, ['email'])}
+          />
+        </div>
         <Section title='Contact Info' schema={contactInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Organization Info' schema={organizationInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Social Profiles' schema={socialProfileInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Writing Info' schema={writingInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
+        <div>
+          <RaisedButton label='Add Contact' />
+        </div>
       </div>
     );
   }
