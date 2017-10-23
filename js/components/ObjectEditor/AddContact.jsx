@@ -196,7 +196,7 @@ const Node = ({item, onChange, keyPath, base}) => {
     return (
       <TextField
       floatingLabelFixed
-      name={name}
+      name={`${[...keyPath, ...shape.keyPath].join('-')}-text-node`}
       value={base.getIn([...keyPath, ...shape.keyPath])}
       floatingLabelText={name}
       hintText={shape.placeholder || shape.objectType}
@@ -244,7 +244,7 @@ const ArrayObjectShapeTypeNode = props => {
   return [
       ...list.map((listVal, i) =>
       <div style={{border: '1px solid lightgrey', padding: 5, margin: 5}} >
-        <Node key={`array-node-${listVal}-${i}`} {...props} keyPath={[...shape.keyPath, i]} item={shape.objectShape} />
+        <Node key={`array-node-${i}`} {...props} keyPath={[...shape.keyPath, i]} item={shape.objectShape} />
         <FontIcon
         key={`array-icon-${listVal}-${i}`}
         className='fa fa-times pointer right'
@@ -254,7 +254,7 @@ const ArrayObjectShapeTypeNode = props => {
         />
       </div>
     ),
-    <Node key={`array-node-extra`} {...props} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} />
+    <Node key={`array-node-${list.size}-extra`} {...props} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} />
   ];
 };
 
@@ -302,7 +302,7 @@ const ArrayObjectShapeTypeItem = props => {
             <span>
               <TextField
               floatingLabelFixed
-              name={`${name}-${i}`}
+              name={`${[...shape.keyPath, i].join('-')}-${name}`}
               value={base.getIn([...shape.keyPath, i])}
               floatingLabelText={name}
               hintText={shape.objectShape}
@@ -318,7 +318,7 @@ const ArrayObjectShapeTypeItem = props => {
             ),
           <TextField
           floatingLabelFixed
-          name={`${name}-${list.size}`}
+          name={`${[...shape.keyPath, list.size].join('-')}-${name}`}
           value={base.getIn([...shape.keyPath, list.size])}
           floatingLabelText={name}
           hintText={shape.objectShape}
