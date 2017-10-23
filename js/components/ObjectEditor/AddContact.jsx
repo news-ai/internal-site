@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -7,19 +8,19 @@ import {grey500, grey700} from 'material-ui/styles/colors';
 // import contacts from './50contacts';
 
 const contactInfoShape = {
-  familyName: {
-    objectType: 'string',
-    keyPath: ['contactInfo', 'familyName']
-  },
-  fullName: {
-    objectType: 'string',
-    keyPath: ['contactInfo', 'fullName']
-  },
-  givenName: {
+  'First Name': {
     objectType: 'string',
     keyPath: ['contactInfo', 'givenName']
   },
-  websites: {
+  'Last Name': {
+    objectType: 'string',
+    keyPath: ['contactInfo', 'familyName']
+  },
+  'Full Name': {
+    objectType: 'string',
+    keyPath: ['contactInfo', 'fullName']
+  },
+  'Websites': {
     objectType: 'array',
     objectShape: {
       url: {
@@ -32,7 +33,7 @@ const contactInfoShape = {
 };
 
 const organizationInfoShape = {
-  organizations: {
+  'Organizations': {
     objectType: 'array',
     objectShape: {
       'Organization Name': {
@@ -53,7 +54,7 @@ const organizationInfoShape = {
 };
 
 const socialProfileInfoShape = {
-  socialProfiles: {
+  'Social Profiles': {
     objectType: 'array',
     objectShape: {
       'Social Network ID': {
@@ -93,17 +94,67 @@ const writingInfoShape = {
     objectType: 'bool',
     keyPath: ['writingInformation', 'familyName']
   },
-  beats: {
+  'Beats': {
     objectType: 'array',
-    objectShape: 'string',
+    objectShape: 'dropdown',
+    possibleValues: [
+      '---',
+      'Arts and Entertainment',
+      'Beauty',
+      'Business and Finance',
+      'Crime and Justice',
+      'Education',
+      'Energy',
+      'Environment',
+      'Fashion',
+      'Food and Dining',
+      'Health',
+      'Media',
+      'Opinion and Editorial',
+      'Politics',
+      'Real Estate',
+      'Religion',
+      'Science',
+      'Sports',
+      'Technology',
+      'Transportation',
+      'Travel',
+      'Weather',
+      'World',
+    ],
     keyPath: ['writingInformation', 'beats']
   },
-  occasionalBeats: {
+  'Occasional Beats': {
     objectType: 'array',
-    objectShape: 'string',
+    objectShape: 'dropdown',
+    possibleValues: [
+      '---',
+      'Arts and Entertainment',
+      'Beauty',
+      'Business and Finance',
+      'Crime and Justice',
+      'Education',
+      'Energy',
+      'Environment',
+      'Fashion',
+      'Food and Dining',
+      'Health',
+      'Media',
+      'Opinion and Editorial',
+      'Politics',
+      'Real Estate',
+      'Religion',
+      'Science',
+      'Sports',
+      'Technology',
+      'Transportation',
+      'Travel',
+      'Weather',
+      'World',
+    ],
     keyPath: ['writingInformation', 'occasionalBeats']
   },
-  rss: {
+  'RSS': {
     objectType: 'array',
     objectShape: 'string',
     keyPath: ['writingInformation', 'rss']
@@ -113,7 +164,6 @@ const writingInfoShape = {
 const Node = ({item, onChange, keyPath, base}) => {
   return Object.entries(item)
   .map(([name, shape]) => {
-    console.log(base.getIn([...keyPath, ...shape.keyPath]));
     return (
       <TextField
       floatingLabelFixed
@@ -127,7 +177,110 @@ const Node = ({item, onChange, keyPath, base}) => {
   });
 };
 
-const Section = ({title, onChange, onDelete, base, schema}) => {
+const StringObjectShapeTypeItem = props => {
+  const {shape, onChange, base, name} = props;
+  switch (shape.objectShape) {
+    case 'dropdown':
+      return (
+        <div>
+          <div>{name}</div>
+          <select value={base.getIn([...shape.keyPath, 0])} onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}>
+          {shape.possibleValues.map((option, i) =>
+            <option key={`${shape.keyPath.join('-')}-0-${i}`} value={option}>{option}</option>
+            )}
+          </select>
+        </div>
+        );
+    default:
+      return (
+          <div>
+            <div>{name}</div>
+            <TextField
+            floatingLabelFixed
+            name={`${name}-0`}
+            value={base.getIn([...shape.keyPath, 0])}
+            floatingLabelText={name}
+            hintText={shape.objectShape}
+            onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}
+            />
+          </div>
+        );
+  }
+};
+
+
+const ArrayObjectShapeTypeItem = props => {
+  const {list, shape, onChange, onDelete, base, name} = props;
+  switch (shape.objectShape) {
+    case 'dropdown':
+      return (
+        [
+          ...list.map((listVal, i) =>
+            <span>
+              <label>{name}</label>
+              <select value={base.getIn([...shape.keyPath, i])} onChange={e => onChange(e.target.value, [...shape.keyPath, i])}>
+              {shape.possibleValues.map((option, j) =>
+                <option key={`${shape.keyPath.join('-')}-${i}-${j}`} value={option}>{option}</option>
+                )}
+              </select>
+              <FontIcon
+              className='fa fa-times pointer right'
+              color={grey500}
+              hoverColor={grey700}
+              onClick={_ => onDelete([...shape.keyPath, i])}
+              />
+            </span>
+            ),
+          <span>
+            <label>{name}</label>
+            <select
+            value={base.getIn([...shape.keyPath, list.size])}
+            onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
+            >
+            {shape.possibleValues.map((option, j) =>
+              <option key={`${name}-${list.size}-${j}`} value={option}>{option}</option>
+              )}
+            </select>
+          </span>
+        ]
+        );
+    default:
+      return (
+        [
+          ...list.map((listVal, i) =>
+            <span>
+              <TextField
+              floatingLabelFixed
+              name={`${name}-${i}`}
+              value={base.getIn([...shape.keyPath, i])}
+              floatingLabelText={name}
+              hintText={shape.objectShape}
+              onChange={e => onChange(e.target.value, [...shape.keyPath, i])}
+              />
+              <FontIcon
+              className='fa fa-times pointer right'
+              color={grey500}
+              hoverColor={grey700}
+              onClick={_ => onDelete([...shape.keyPath, i])}
+              />
+            </span>
+            ),
+          <TextField
+          floatingLabelFixed
+          name={`${name}-${list.size}`}
+          value={base.getIn([...shape.keyPath, list.size])}
+          floatingLabelText={name}
+          hintText={shape.objectShape}
+          onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
+          />
+        ]
+        );
+  }
+};
+
+
+const Section = props => {
+  const {title, onChange, onDelete, base, schema} = props;
   return (
      <div style={{marginLeft: 20}} >
       <h5>{title}</h5>
@@ -135,42 +288,18 @@ const Section = ({title, onChange, onDelete, base, schema}) => {
         if (shape.objectType === 'array') {
           const list = base.getIn(shape.keyPath);
           if (list) {
+            // RETURN LIST OF ITEMS
+            console.log('array objectShape', shape.objectShape);
             return (
               <div>
                 <div>{name}</div>
-                {typeof shape.objectShape === 'string' ?
+                {typeof shape.objectShape === 'string' ? (
+                  <ArrayObjectShapeTypeItem list={list} shape={shape} {...props} />
+                  ) :
                   [
                     ...list.map((listVal, i) =>
-                      <span>
-                        <TextField
-                        floatingLabelFixed
-                        name={`${name}-${i}`}
-                        value={base.getIn([...shape.keyPath, i])}
-                        floatingLabelText={name}
-                        hintText={shape.objectShape}
-                        onChange={e => onChange(e.target.value, [...shape.keyPath, i])}
-                        />
-                        <FontIcon
-                        className='fa fa-times pointer right'
-                        color={grey500}
-                        hoverColor={grey700}
-                        onClick={_ => onDelete([...shape.keyPath, i])}
-                        />
-                      </span>
-                      ),
-                    <TextField
-                    floatingLabelFixed
-                    name={`${name}-${list.size}`}
-                    value={base.getIn([...shape.keyPath, list.size])}
-                    floatingLabelText={name}
-                    hintText={shape.objectShape}
-                    onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
-                    />
-                  ] :
-                  [
-                    ...list.map((listVal, i) =>
-                      <div style={{border: '1px solid grey', padding: 5, margin: 5}} >
-                        <Node base={base} keyPath={[...shape.keyPath, i]} item={shape.objectShape} onChange={onChange} />
+                      <div style={{border: '1px solid lightgrey', padding: 5, margin: 5}} >
+                        <Node {...props} keyPath={[...shape.keyPath, i]} item={shape.objectShape} />
                         <FontIcon
                         className='fa fa-times pointer right'
                         color={grey500}
@@ -179,27 +308,19 @@ const Section = ({title, onChange, onDelete, base, schema}) => {
                         />
                       </div>
                     ),
-                    <Node base={base} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} onChange={onChange} />
+                    <Node {...props} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} />
                   ]
                 }
               </div>);
           }
+          // RETURN SINGLE ITEM
+
           return typeof shape.objectShape === 'string' ? (
-            <div>
-              <div>{name}</div>
-              <TextField
-              floatingLabelFixed
-              name={`${name}-0`}
-              value={base.getIn([...shape.keyPath, 0])}
-              floatingLabelText={name}
-              hintText={shape.objectShape}
-              onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}
-              />
-            </div>
+            <StringObjectShapeTypeItem shape={shape} {...props} />
             ) : (
             <div>
               <div>{name}</div>
-              <Node base={base} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} onChange={onChange} onDelete={onDelete} />
+              <Node {...props} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} />
             </div>);
         }
         return (
@@ -246,7 +367,7 @@ class AddContact extends Component {
   render() {
     console.log(JSON.stringify(this.state.base.toJS(), null, 2));
     return (
-      <div>
+      <div style={{marginBottom: 100}} >
         <div style={{marginLeft: 20}} >
           <TextField
           floatingLabelFixed
@@ -261,12 +382,15 @@ class AddContact extends Component {
         <Section title='Organization Info' schema={organizationInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Social Profiles' schema={socialProfileInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Writing Info' schema={writingInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
-        <div>
-          <RaisedButton label='Add Contact' />
+        <div style={{margin: 20}} >
+          <RaisedButton primary label='Add Contact' />
         </div>
       </div>
     );
   }
 }
 
-export default AddContact;
+export default connect(
+  null,
+  dispatch => ({postContact: data => dispatch({type: 'POST_CONTACT', data})})
+  )(AddContact);
