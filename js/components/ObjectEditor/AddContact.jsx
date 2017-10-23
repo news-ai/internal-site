@@ -5,7 +5,7 @@ import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import FontIcon from 'material-ui/FontIcon';
 import {grey500, grey700} from 'material-ui/styles/colors';
-// import contacts from './50contacts';
+import PlainSelect from 'components/PlainSelect';
 
 const contactInfoShape = {
   'First Name': {
@@ -164,6 +164,31 @@ const writingInfoShape = {
 const Node = ({item, onChange, keyPath, base}) => {
   return Object.entries(item)
   .map(([name, shape]) => {
+    if (shape.objectType === 'bool') {
+      return (
+        <div>
+          <div>{name}</div>
+          <PlainSelect
+          value={base.getIn([...keyPath, ...shape.keyPath])}
+          onChange={e => {
+            switch (e.target.value) {
+              case '---':
+                return onChange(undefined, [...keyPath, ...shape.keyPath]);
+              case 'true':
+                return onChange(true, [...keyPath, ...shape.keyPath]);
+              case 'false':
+                return onChange(false, [...keyPath, ...shape.keyPath]);
+              default:
+                return onChange(undefined, [...keyPath, ...shape.keyPath]);
+            }
+          }}
+          >
+            <option value='---' >---</option>
+            <option value='true' >true</option>
+            <option value='false' >---</option>
+          </PlainSelect>
+        </div>);
+    }
     return (
       <TextField
       floatingLabelFixed
@@ -184,11 +209,11 @@ const StringObjectShapeTypeItem = props => {
       return (
         <div>
           <div>{name}</div>
-          <select value={base.getIn([...shape.keyPath, 0])} onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}>
+          <PlainSelect value={base.getIn([...shape.keyPath, 0])} onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}>
           {shape.possibleValues.map((option, i) =>
             <option key={`${shape.keyPath.join('-')}-0-${i}`} value={option}>{option}</option>
             )}
-          </select>
+          </PlainSelect>
         </div>
         );
     default:
@@ -218,11 +243,11 @@ const ArrayObjectShapeTypeItem = props => {
           ...list.map((listVal, i) =>
             <span>
               <label>{name}</label>
-              <select value={base.getIn([...shape.keyPath, i])} onChange={e => onChange(e.target.value, [...shape.keyPath, i])}>
+              <PlainSelect value={base.getIn([...shape.keyPath, i])} onChange={e => onChange(e.target.value, [...shape.keyPath, i])}>
               {shape.possibleValues.map((option, j) =>
                 <option key={`${shape.keyPath.join('-')}-${i}-${j}`} value={option}>{option}</option>
                 )}
-              </select>
+              </PlainSelect>
               <FontIcon
               className='fa fa-times pointer right'
               color={grey500}
@@ -233,14 +258,14 @@ const ArrayObjectShapeTypeItem = props => {
             ),
           <span>
             <label>{name}</label>
-            <select
+            <PlainSelect
             value={base.getIn([...shape.keyPath, list.size])}
             onChange={e => onChange(e.target.value, [...shape.keyPath, list.size])}
             >
             {shape.possibleValues.map((option, j) =>
               <option key={`${name}-${list.size}-${j}`} value={option}>{option}</option>
               )}
-            </select>
+            </PlainSelect>
           </span>
         ]
         );
@@ -289,10 +314,9 @@ const Section = props => {
           const list = base.getIn(shape.keyPath);
           if (list) {
             // RETURN LIST OF ITEMS
-            console.log('array objectShape', shape.objectShape);
             return (
               <div>
-                <div>{name}</div>
+                <div>{name} [array]</div>
                 {typeof shape.objectShape === 'string' ? (
                   <ArrayObjectShapeTypeItem list={list} shape={shape} {...props} />
                   ) :
@@ -319,8 +343,33 @@ const Section = props => {
             <StringObjectShapeTypeItem shape={shape} {...props} />
             ) : (
             <div>
-              <div>{name}</div>
+              <div>{name} [array]</div>
               <Node {...props} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} />
+            </div>);
+        }
+        if (shape.objectType === 'bool') {
+          return (
+            <div>
+              <div>{name}</div>
+              <PlainSelect
+              value={base.getIn(shape.keyPath)}
+              onChange={e => {
+                switch (e.target.value) {
+                  case '---':
+                    return onChange(undefined, shape.keyPath);
+                  case 'true':
+                    return onChange(true, shape.keyPath);
+                  case 'false':
+                    return onChange(false, shape.keyPath);
+                  default:
+                    return onChange(undefined, shape.keyPath);
+                }
+              }}
+              >
+                <option value='---' >---</option>
+                <option value='true' >true</option>
+                <option value='false' >---</option>
+              </PlainSelect>
             </div>);
         }
         return (
