@@ -44,6 +44,10 @@ const organizationInfoShape = {
         objectType: 'string',
         keyPath: ['startDate']
       },
+      'End Date': {
+        objectType: 'string',
+        keyPath: ['endDate']
+      },
       'Title': {
         objectType: 'string',
         keyPath: ['title']
@@ -92,7 +96,7 @@ const socialProfileInfoShape = {
 const writingInfoShape = {
   isFreelancer: {
     objectType: 'bool',
-    keyPath: ['writingInformation', 'familyName']
+    keyPath: ['writingInformation', 'isFreelancer']
   },
   'Beats': {
     objectType: 'array',
@@ -185,7 +189,7 @@ const Node = ({item, onChange, keyPath, base}) => {
           >
             <option value='---' >---</option>
             <option value='true' >true</option>
-            <option value='false' >---</option>
+            <option value='false'>false</option>
           </PlainSelect>
         </div>);
     }
@@ -234,6 +238,28 @@ const StringObjectShapeTypeItem = props => {
 };
 
 
+// not last item in shapeMap, more to recursively render
+const ArrayObjectShapeTypeNode = props => {
+  const {list, shape, onDelete} = props;
+  return [
+      ...list.map((listVal, i) =>
+      <div style={{border: '1px solid lightgrey', padding: 5, margin: 5}} >
+        <Node key={`array-node-${listVal}-${i}`} {...props} keyPath={[...shape.keyPath, i]} item={shape.objectShape} />
+        <FontIcon
+        key={`array-icon-${listVal}-${i}`}
+        className='fa fa-times pointer right'
+        color={grey500}
+        hoverColor={grey700}
+        onClick={_ => onDelete([...shape.keyPath, i])}
+        />
+      </div>
+    ),
+    <Node key={`array-node-extra`} {...props} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} />
+  ];
+};
+
+
+// last item in shapeMap
 const ArrayObjectShapeTypeItem = props => {
   const {list, shape, onChange, onDelete, base, name} = props;
   switch (shape.objectShape) {
@@ -305,7 +331,7 @@ const ArrayObjectShapeTypeItem = props => {
 
 
 const Section = props => {
-  const {title, onChange, onDelete, base, schema} = props;
+  const {title, onChange, base, schema} = props;
   return (
      <div style={{marginLeft: 20}} >
       <h5>{title}</h5>
@@ -318,33 +344,21 @@ const Section = props => {
               <div>
                 <div>{name} [array]</div>
                 {typeof shape.objectShape === 'string' ? (
-                  <ArrayObjectShapeTypeItem list={list} shape={shape} {...props} />
-                  ) :
-                  [
-                    ...list.map((listVal, i) =>
-                      <div style={{border: '1px solid lightgrey', padding: 5, margin: 5}} >
-                        <Node {...props} keyPath={[...shape.keyPath, i]} item={shape.objectShape} />
-                        <FontIcon
-                        className='fa fa-times pointer right'
-                        color={grey500}
-                        hoverColor={grey700}
-                        onClick={_ => onDelete([...shape.keyPath, i])}
-                        />
-                      </div>
-                    ),
-                    <Node {...props} keyPath={[...shape.keyPath, list.size]} item={shape.objectShape} />
-                  ]
+                  <ArrayObjectShapeTypeItem key={`${name}-array-object`} list={list} shape={shape} {...props} />
+                  ) : (
+                  <ArrayObjectShapeTypeNode key={`${name}-array-object`} list={list} shape={shape} {...props} />
+                  )
                 }
               </div>);
           }
           // RETURN SINGLE ITEM
 
           return typeof shape.objectShape === 'string' ? (
-            <StringObjectShapeTypeItem shape={shape} {...props} />
+            <StringObjectShapeTypeItem key={`${name}-array-object`} shape={shape} {...props} />
             ) : (
             <div>
               <div>{name} [array]</div>
-              <Node {...props} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} />
+              <Node key={`${name}-array-object`} {...props} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} />
             </div>);
         }
         if (shape.objectType === 'bool') {
@@ -368,7 +382,7 @@ const Section = props => {
               >
                 <option value='---' >---</option>
                 <option value='true' >true</option>
-                <option value='false' >---</option>
+                <option value='false' >false</option>
               </PlainSelect>
             </div>);
         }
