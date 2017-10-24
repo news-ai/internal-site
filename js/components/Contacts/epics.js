@@ -73,7 +73,7 @@ export const postContact = (action$, {getState}) =>
       Observable.of({type: contactConstant.CREATE_REQUEST, data}),
       Observable.fromPromise(api.post(`/database-contacts`, data))
       .map(response => ({type: contactConstant.RECEIVE, email: response.data.email, contact: response.data}))
-      .catch(err => Observable.of({type: contactConstant.REQUEST_FAIL, message: err, email}))
+      .catch(err => Observable.of({type: contactConstant.REQUEST_FAIL, message: err.response, email}))
       )
     )
   .takeUntil(action$.ofType(contactConstant.REQUEST_ABORT));

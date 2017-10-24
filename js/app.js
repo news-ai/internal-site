@@ -79,7 +79,9 @@ const Base = () => (
             <Route path='contact' component={Contact} />
           </Route>
           <Route path='search' name='Search Results' component={SearchResults} />
+        {/*
           <Route path='edit' name='Search Results' component={ObjectEditor} />
+        */}
           <Route path='add' name='Add' >
             <IndexRoute component={AddContainer} />
             <Route path='contact' component={AddContact} />

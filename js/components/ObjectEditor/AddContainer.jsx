@@ -6,7 +6,6 @@ const AddContainer = (props) => {
   return (
     <div>
       <Link to='/add/contact' activeStyle={{color: 'red'}} >Contact</Link>
-      <Link to='/add/publication' activeStyle={{color: 'red'}} >Publication</Link>
     </div>
     );
 };

@@ -22,4 +22,5 @@ export const commonTypes = [
   'ADD_REQUESTED',
   'ADD_RECEIVED',
   'REDUCER_RESET',
+  'CLEAR_FAIL_MESSAGE',
 ];

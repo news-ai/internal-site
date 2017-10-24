@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
- import Link from 'react-router/lib/Link';
+import Link from 'react-router/lib/Link';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import FontIcon from 'material-ui/FontIcon';
-import {grey500, grey700} from 'material-ui/styles/colors';
+import {grey500, grey700, yellow50, red600} from 'material-ui/styles/colors';
 import PlainSelect from 'components/PlainSelect';
 
 const contactInfoShape = {
@@ -346,7 +346,7 @@ const Section = props => {
               <div>
                 <div>{name} [array]</div>
                 {typeof shape.objectShape === 'string' ? (
-                  <ArrayObjectShapeTypeItem key={`${name}-array-object`} list={list} shape={shape} {...props} />
+                  <ArrayObjectShapeTypeItem key={`${name}-array-item`} list={list} shape={shape} {...props} />
                   ) : (
                   <ArrayObjectShapeTypeNode key={`${name}-array-object`} list={list} shape={shape} {...props} />
                   )
@@ -430,7 +430,8 @@ class AddContact extends Component {
   }
 
   render() {
-    console.log(JSON.stringify(this.state.base.toJS(), null, 2));
+    // console.log(JSON.stringify(this.state.base.toJS(), null, 2));
+    // console.log(this.props.didInvalidateError);
     return (
       <div style={{marginBottom: 100}} >
         <div style={{marginLeft: 20}} >
@@ -458,7 +459,14 @@ class AddContact extends Component {
           }}
           />
           {this.props.didContactInvalidate &&
-            <span style={{color: 'red', margin: 10}}>Error occurred!</span>}
+            <div style={{background: yellow50, padding: 10, margin: '10px 0'}} >
+              <span style={{color: red600}}>Error</span>
+              <FontIcon className='fa fa-times right' color={grey500} hoverColor={grey700} onClick={this.props.clearErrorMessage} />
+              {this.props.didInvalidateError.data.errors.map(msg =>
+                <p>{JSON.stringify(msg, null, 2)}</p>
+                )}
+            </div>
+          }
           <ShowLinkIfContactExists email={this.state.base.getIn(['email'])}>Go to contact page >></ShowLinkIfContactExists>
         </div>
       </div>
@@ -474,8 +482,12 @@ export default connect(
   state => {
     return {
       isContactReceiving: state.contactReducer.isReceiving,
-      didContactInvalidate: state.contactReducer.didInvalidate
+      didContactInvalidate: state.contactReducer.didInvalidate,
+      didInvalidateError: state.contactReducer.recentError,
     };
   },
-  dispatch => ({postContact: data => dispatch({type: 'POST_CONTACT', data})})
+  dispatch => ({
+    postContact: data => dispatch({type: 'POST_CONTACT', data}),
+    clearErrorMessage: _ => dispatch({type: 'CONTACT_CLEAR_FAIL_MESSAGE'})
+  })
   )(AddContact);

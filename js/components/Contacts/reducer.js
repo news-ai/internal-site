@@ -11,6 +11,8 @@ const initialState = {
 function contactReducer(state = initialState, action) {
   if (window.isDev) Object.freeze(state);
   switch (action.type) {
+    case contactConstant.CLEAR_FAIL_MESSAGE:
+      return assignToEmpty(state, {didInvalidate: false, recentError: undefined});
     case contactConstant.REQUEST:
       return assignToEmpty(state, {
         isReceiving: true,
@@ -32,7 +34,8 @@ function contactReducer(state = initialState, action) {
     case contactConstant.REQUEST_FAIL:
       return assignToEmpty(state, {
         isReceiving: false,
-        didInvalidate: true
+        didInvalidate: true,
+        recentError: action.message
       });
     case contactConstant.REQUEST_MULTIPLE:
       return assignToEmpty(state, {
@@ -49,7 +52,8 @@ function contactReducer(state = initialState, action) {
     case contactConstant.REQUEST_MULTIPLE_FAIL:
       return assignToEmpty(state, {
         isReceiving: false,
-        didInvalidate: true
+        didInvalidate: true,
+        recentError: action.message
       });
     default:
       return state;
