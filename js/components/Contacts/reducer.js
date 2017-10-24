@@ -23,6 +23,10 @@ function contactReducer(state = initialState, action) {
         [action.email]: action.contact,
         received: [...state.received.filter(e => e !== action.email), action.email]
       });
+    case contactConstant.CREATE_REQUEST:
+      return assignToEmpty(state, {
+        isReceiving: false
+      });
     case contactConstant.REQUEST_ABORT:
       return assignToEmpty(state, {isReceiving: false});
     case contactConstant.REQUEST_FAIL:

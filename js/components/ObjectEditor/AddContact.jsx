@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
+ import Link from 'react-router/lib/Link';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import FontIcon from 'material-ui/FontIcon';
@@ -211,7 +212,7 @@ const StringObjectShapeTypeItem = props => {
   switch (shape.objectShape) {
     case 'dropdown':
       return (
-        <div>
+        <div style={{marginTop: 15}} >
           <div>{name}</div>
           <PlainSelect value={base.getIn([...shape.keyPath, 0])} onChange={e => onChange(e.target.value, [...shape.keyPath, 0])}>
           {shape.possibleValues.map((option, i) =>
@@ -222,7 +223,7 @@ const StringObjectShapeTypeItem = props => {
         );
     default:
       return (
-          <div>
+          <div style={{display: 'block'}} >
             <div>{name}</div>
             <TextField
             floatingLabelFixed
@@ -267,7 +268,7 @@ const ArrayObjectShapeTypeItem = props => {
       return (
         [
           ...list.map((listVal, i) =>
-            <span>
+            <span style={{marginTop: 15}} >
               <label>{name}</label>
               <PlainSelect value={base.getIn([...shape.keyPath, i])} onChange={e => onChange(e.target.value, [...shape.keyPath, i])}>
               {shape.possibleValues.map((option, j) =>
@@ -275,14 +276,15 @@ const ArrayObjectShapeTypeItem = props => {
                 )}
               </PlainSelect>
               <FontIcon
-              className='fa fa-times pointer right'
+              style={{margin: '0 5px'}}
+              className='fa fa-times pointer'
               color={grey500}
               hoverColor={grey700}
               onClick={_ => onDelete([...shape.keyPath, i])}
               />
             </span>
             ),
-          <span>
+          <span style={{marginTop: 15}} >
             <label>{name}</label>
             <PlainSelect
             value={base.getIn([...shape.keyPath, list.size])}
@@ -299,7 +301,7 @@ const ArrayObjectShapeTypeItem = props => {
       return (
         [
           ...list.map((listVal, i) =>
-            <span>
+            <span style={{margin: 10}} >
               <TextField
               floatingLabelFixed
               name={`${[...shape.keyPath, i].join('-')}-${name}`}
@@ -309,7 +311,7 @@ const ArrayObjectShapeTypeItem = props => {
               onChange={e => onChange(e.target.value, [...shape.keyPath, i])}
               />
               <FontIcon
-              className='fa fa-times pointer right'
+              className='fa fa-times pointer'
               color={grey500}
               hoverColor={grey700}
               onClick={_ => onDelete([...shape.keyPath, i])}
@@ -356,7 +358,7 @@ const Section = props => {
           return typeof shape.objectShape === 'string' ? (
             <StringObjectShapeTypeItem key={`${name}-array-object`} shape={shape} {...props} />
             ) : (
-            <div>
+            <div style={{display: 'block'}} >
               <div>{name} [array]</div>
               <Node key={`${name}-array-object`} {...props} keyPath={[...shape.keyPath, 0]} item={shape.objectShape} />
             </div>);
@@ -387,7 +389,7 @@ const Section = props => {
             </div>);
         }
         return (
-          <div>
+          <div style={{display: 'block'}} >
             <TextField
             floatingLabelFixed
             name={name}
@@ -446,14 +448,34 @@ class AddContact extends Component {
         <Section title='Social Profiles' schema={socialProfileInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <Section title='Writing Info' schema={writingInfoShape} base={this.state.base} onChange={this.onChange} onDelete={this.onDelete} />
         <div style={{margin: 20}} >
-          <RaisedButton primary label='Add Contact' />
+          <RaisedButton
+          primary
+          label='Add Contact'
+          disabled={this.props.isContactReceiving}
+          onClick={_ => {
+            console.log(JSON.stringify(this.state.base.toJS(), null, 2));
+            this.props.postContact(this.state.base.toJS());
+          }}
+          />
+          {this.props.didContactInvalidate &&
+            <span style={{color: 'red', margin: 10}}>Error occurred!</span>}
+          <ShowLinkIfContactExists email={this.state.base.getIn(['email'])}>Go to contact page >></ShowLinkIfContactExists>
         </div>
       </div>
     );
   }
 }
 
+const ContactLink = ({contact, children}) => contact ? <Link to={{pathname: `/contacts/contact`, search: `?email=${contact.email}`}}>{children}</Link> : null;
+
+const ShowLinkIfContactExists = connect((state, props) => ({contact: state.contactReducer[props.email]}))(ContactLink);
+
 export default connect(
-  null,
+  state => {
+    return {
+      isContactReceiving: state.contactReducer.isReceiving,
+      didContactInvalidate: state.contactReducer.didInvalidate
+    };
+  },
   dispatch => ({postContact: data => dispatch({type: 'POST_CONTACT', data})})
   )(AddContact);
